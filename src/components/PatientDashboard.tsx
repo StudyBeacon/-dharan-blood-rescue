@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,13 +21,49 @@ interface PatientDashboardProps {
   };
 }
 
+interface BloodRequest {
+  id: number;
+  type: 'blood';
+  bloodGroup: string;
+  status: string;
+  requestedAt: string;
+  location: string;
+  responses: number;
+  urgency: string;
+  progress: number;
+  unitsNeeded?: string;
+  contactPerson?: string;
+  contactNumber?: string;
+  additionalInfo?: string;
+}
+
+interface AmbulanceRequest {
+  id: number;
+  type: 'ambulance';
+  status: string;
+  requestedAt: string;
+  pickupLocation: string;
+  destination: string;
+  driverName?: string;
+  driverPhone?: string;
+  estimatedTime?: string;
+  progress: number;
+  urgency?: string;
+  contactPerson?: string;
+  contactNumber?: string;
+  patientCondition?: string;
+  specialRequirements?: string;
+}
+
+type ActiveRequest = BloodRequest | AmbulanceRequest;
+
 const PatientDashboard = ({ user }: PatientDashboardProps) => {
   const [showBloodForm, setShowBloodForm] = useState(false);
   const [showAmbulanceForm, setShowAmbulanceForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   
-  const [activeRequests, setActiveRequests] = useState([
+  const [activeRequests, setActiveRequests] = useState<ActiveRequest[]>([
     {
       id: 1,
       type: 'blood',
@@ -94,10 +129,16 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const newRequest = {
+      const newRequest: BloodRequest = {
         id: Date.now(),
         type: 'blood',
-        ...bloodRequest,
+        bloodGroup: bloodRequest.bloodGroup,
+        urgency: bloodRequest.urgency,
+        location: bloodRequest.location,
+        contactPerson: bloodRequest.contactPerson,
+        contactNumber: bloodRequest.contactNumber,
+        additionalInfo: bloodRequest.additionalInfo,
+        unitsNeeded: bloodRequest.unitsNeeded,
         status: 'Active',
         requestedAt: 'Just now',
         responses: 0,
@@ -141,10 +182,16 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const newRequest = {
+      const newRequest: AmbulanceRequest = {
         id: Date.now(),
         type: 'ambulance',
-        ...ambulanceRequest,
+        pickupLocation: ambulanceRequest.pickupLocation,
+        destination: ambulanceRequest.destination,
+        urgency: ambulanceRequest.urgency,
+        contactPerson: ambulanceRequest.contactPerson,
+        contactNumber: ambulanceRequest.contactNumber,
+        patientCondition: ambulanceRequest.patientCondition,
+        specialRequirements: ambulanceRequest.specialRequirements,
         status: 'Dispatching',
         requestedAt: 'Just now',
         driverName: 'Assigning...',
@@ -269,12 +316,12 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
                       
                       <div className="space-y-1">
                         <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
-                          {request.bloodGroup && (
+                          {request.type === 'blood' && (
                             <span className="font-medium text-red-600 dark:text-red-400">{request.bloodGroup}</span>
                           )}
                           <span className="flex items-center space-x-1">
                             <MapPin className="h-4 w-4" />
-                            <span>{request.location || request.pickupLocation}</span>
+                            <span>{request.type === 'blood' ? request.location : request.pickupLocation}</span>
                           </span>
                           <span>{request.requestedAt}</span>
                         </div>
@@ -345,7 +392,7 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
       {/* Real-time Ambulance Tracker */}
       {activeRequests.some(r => r.type === 'ambulance') && (
         <AmbulanceTracker 
-          activeAmbulanceRequests={activeRequests.filter(r => r.type === 'ambulance')} 
+          activeAmbulanceRequests={activeRequests.filter(r => r.type === 'ambulance') as AmbulanceRequest[]} 
         />
       )}
 

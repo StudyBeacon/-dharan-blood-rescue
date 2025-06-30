@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,9 +9,10 @@ import { Heart, Phone, Mail, User, Lock } from 'lucide-react';
 
 interface AuthFormProps {
   onLogin: (role: 'donor' | 'driver' | 'patient', userData: any) => void;
+  currentLanguage?: 'en' | 'ne';
 }
 
-const AuthForm = ({ onLogin }: AuthFormProps) => {
+const AuthForm = ({ onLogin, currentLanguage = 'en' }: AuthFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({
     email: '',
