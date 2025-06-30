@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,13 +7,28 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, Truck, Plus, Clock, MapPin, Phone } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Heart, Truck, Plus, Clock, MapPin, Phone, Navigation, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import AmbulanceTracker from '@/components/AmbulanceTracker';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
-const PatientDashboard = () => {
+interface PatientDashboardProps {
+  user: {
+    name: string;
+    email: string;
+    role: string;
+    id: string;
+  };
+}
+
+const PatientDashboard = ({ user }: PatientDashboardProps) => {
   const [showBloodForm, setShowBloodForm] = useState(false);
   const [showAmbulanceForm, setShowAmbulanceForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   
-  const [activeRequests] = useState([
+  const [activeRequests, setActiveRequests] = useState([
     {
       id: 1,
       type: 'blood',
@@ -21,7 +36,21 @@ const PatientDashboard = () => {
       status: 'Active',
       requestedAt: '30 minutes ago',
       location: 'Dharan Hospital',
-      responses: 3
+      responses: 3,
+      urgency: 'Critical',
+      progress: 60
+    },
+    {
+      id: 2,
+      type: 'ambulance',
+      status: 'En Route',
+      requestedAt: '15 minutes ago',
+      pickupLocation: 'Dharan-5, Main Road',
+      destination: 'BP Koirala Health Science',
+      driverName: 'Ramesh Gurung',
+      driverPhone: '+977-9841234567',
+      estimatedTime: '8 minutes',
+      progress: 75
     }
   ]);
 
@@ -31,7 +60,8 @@ const PatientDashboard = () => {
     location: '',
     contactPerson: '',
     contactNumber: '',
-    additionalInfo: ''
+    additionalInfo: '',
+    unitsNeeded: '1'
   });
 
   const [ambulanceRequest, setAmbulanceRequest] = useState({
@@ -40,57 +70,147 @@ const PatientDashboard = () => {
     urgency: '',
     contactPerson: '',
     contactNumber: '',
-    patientCondition: ''
+    patientCondition: '',
+    specialRequirements: ''
   });
 
-  const handleBloodRequest = (e: React.FormEvent) => {
+  // Real-time updates simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveRequests(prev => prev.map(request => ({
+        ...request,
+        progress: Math.min(request.progress + Math.random() * 5, 100)
+      })));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleBloodRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Blood request submitted:', bloodRequest);
-    setShowBloodForm(false);
-    // Reset form
-    setBloodRequest({
-      bloodGroup: '',
-      urgency: '',
-      location: '',
-      contactPerson: '',
-      contactNumber: '',
-      additionalInfo: ''
-    });
+    setIsLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const newRequest = {
+        id: Date.now(),
+        type: 'blood',
+        ...bloodRequest,
+        status: 'Active',
+        requestedAt: 'Just now',
+        responses: 0,
+        progress: 0
+      };
+      
+      setActiveRequests(prev => [newRequest, ...prev]);
+      setShowBloodForm(false);
+      
+      // Reset form
+      setBloodRequest({
+        bloodGroup: '',
+        urgency: '',
+        location: '',
+        contactPerson: '',
+        contactNumber: '',
+        additionalInfo: '',
+        unitsNeeded: '1'
+      });
+
+      toast({
+        title: "Blood Request Submitted",
+        description: "Your blood request has been sent to nearby donors.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit blood request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleAmbulanceRequest = (e: React.FormEvent) => {
+  const handleAmbulanceRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Ambulance request submitted:', ambulanceRequest);
-    setShowAmbulanceForm(false);
-    // Reset form
-    setAmbulanceRequest({
-      pickupLocation: '',
-      destination: '',
-      urgency: '',
-      contactPerson: '',
-      contactNumber: '',
-      patientCondition: ''
-    });
+    setIsLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const newRequest = {
+        id: Date.now(),
+        type: 'ambulance',
+        ...ambulanceRequest,
+        status: 'Dispatching',
+        requestedAt: 'Just now',
+        driverName: 'Assigning...',
+        driverPhone: '',
+        estimatedTime: 'Calculating...',
+        progress: 0
+      };
+      
+      setActiveRequests(prev => [newRequest, ...prev]);
+      setShowAmbulanceForm(false);
+      
+      // Reset form
+      setAmbulanceRequest({
+        pickupLocation: '',
+        destination: '',
+        urgency: '',
+        contactPerson: '',
+        contactNumber: '',
+        patientCondition: '',
+        specialRequirements: ''
+      });
+
+      toast({
+        title: "Ambulance Requested",
+        description: "Emergency dispatch has been notified. Help is on the way.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to request ambulance. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'critical': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'en route': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'dispatching': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Emergency Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800 hover:shadow-lg transition-all duration-300 hover-scale">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-red-700">
-              <Heart className="h-5 w-5 fill-current" />
+            <CardTitle className="flex items-center space-x-2 text-red-700 dark:text-red-300">
+              <Heart className="h-5 w-5 fill-current animate-pulse" />
               <span>Request Blood</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="dark:text-red-200">
               Find blood donors in your area quickly
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button 
               onClick={() => setShowBloodForm(true)}
-              className="w-full bg-red-600 hover:bg-red-700"
+              className="w-full bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 transition-colors"
+              disabled={isLoading}
             >
               <Plus className="h-4 w-4 mr-2" />
               Request Blood
@@ -98,20 +218,21 @@ const PatientDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-blue-200 bg-blue-50">
+        <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800 hover:shadow-lg transition-all duration-300 hover-scale">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-blue-700">
+            <CardTitle className="flex items-center space-x-2 text-blue-700 dark:text-blue-300">
               <Truck className="h-5 w-5" />
               <span>Request Ambulance</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="dark:text-blue-200">
               Get emergency medical transport
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button 
               onClick={() => setShowAmbulanceForm(true)}
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
+              disabled={isLoading}
             >
               <Plus className="h-4 w-4 mr-2" />
               Request Ambulance
@@ -121,9 +242,9 @@ const PatientDashboard = () => {
       </div>
 
       {/* Active Requests */}
-      <Card>
+      <Card className="dark:bg-gray-800 dark:border-gray-700">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-2 dark:text-white">
             <Clock className="h-5 w-5 text-orange-600" />
             <span>Active Requests</span>
           </CardTitle>
@@ -132,10 +253,10 @@ const PatientDashboard = () => {
           {activeRequests.length > 0 ? (
             <div className="space-y-4">
               {activeRequests.map((request) => (
-                <div key={request.id} className="border rounded-lg p-4">
+                <div key={request.id} className="border dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-700 hover:shadow-md transition-all duration-300">
                   <div className="flex items-start justify-between mb-3">
-                    <div className="space-y-1">
-                      <h3 className="font-semibold flex items-center space-x-2">
+                    <div className="space-y-2 flex-1">
+                      <h3 className="font-semibold flex items-center space-x-2 dark:text-white">
                         {request.type === 'blood' ? (
                           <Heart className="h-4 w-4 text-red-600 fill-current" />
                         ) : (
@@ -145,50 +266,95 @@ const PatientDashboard = () => {
                           {request.type === 'blood' ? 'Blood Request' : 'Ambulance Request'}
                         </span>
                       </h3>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        {request.bloodGroup && (
-                          <span className="font-medium">{request.bloodGroup}</span>
+                      
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
+                          {request.bloodGroup && (
+                            <span className="font-medium text-red-600 dark:text-red-400">{request.bloodGroup}</span>
+                          )}
+                          <span className="flex items-center space-x-1">
+                            <MapPin className="h-4 w-4" />
+                            <span>{request.location || request.pickupLocation}</span>
+                          </span>
+                          <span>{request.requestedAt}</span>
+                        </div>
+                        
+                        {request.type === 'ambulance' && request.driverName && (
+                          <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
+                            <span><strong>Driver:</strong> {request.driverName}</span>
+                            {request.estimatedTime && (
+                              <span><strong>ETA:</strong> {request.estimatedTime}</span>
+                            )}
+                          </div>
                         )}
-                        <span className="flex items-center space-x-1">
-                          <MapPin className="h-4 w-4" />
-                          <span>{request.location}</span>
-                        </span>
-                        <span>{request.requestedAt}</span>
+                        
+                        <div className="mt-2">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="text-sm text-gray-600 dark:text-gray-300">Progress:</span>
+                            <span className="text-sm font-medium dark:text-white">{Math.round(request.progress)}%</span>
+                          </div>
+                          <Progress value={request.progress} className="h-2" />
+                        </div>
                       </div>
                     </div>
-                    <Badge className="bg-green-100 text-green-800">
+                    <Badge className={getStatusColor(request.status)}>
                       {request.status}
                     </Badge>
                   </div>
                   
-                  {request.type === 'blood' && (
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <span className="text-sm text-gray-600">
-                        {request.responses} donors responded
-                      </span>
-                      <Button variant="outline" size="sm">
-                        View Responses
-                      </Button>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between pt-2 border-t dark:border-gray-600">
+                    {request.type === 'blood' ? (
+                      <>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">
+                          {request.responses} donors responded
+                        </span>
+                        <Button variant="outline" size="sm" className="dark:border-gray-500 dark:text-gray-300">
+                          View Responses
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center space-x-2">
+                          {request.driverPhone && (
+                            <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                              <Phone className="h-4 w-4" />
+                              <span>Call Driver</span>
+                            </Button>
+                          )}
+                        </div>
+                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                          <Navigation className="h-4 w-4 mr-1" />
+                          Track Live
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500">
-              <Clock className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <Clock className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
               <p>No active requests</p>
+              <p className="text-sm">Your emergency requests will appear here</p>
             </div>
           )}
         </CardContent>
       </Card>
 
+      {/* Real-time Ambulance Tracker */}
+      {activeRequests.some(r => r.type === 'ambulance') && (
+        <AmbulanceTracker 
+          activeAmbulanceRequests={activeRequests.filter(r => r.type === 'ambulance')} 
+        />
+      )}
+
       {/* Blood Request Form Modal */}
       {showBloodForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fade-in">
+          <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-800">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 dark:text-white">
                 <Heart className="h-5 w-5 text-red-600 fill-current" />
                 <span>Request Blood</span>
               </CardTitle>
@@ -196,9 +362,9 @@ const PatientDashboard = () => {
             <CardContent>
               <form onSubmit={handleBloodRequest} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="blood-group">Blood Group Needed</Label>
-                  <Select value={bloodRequest.bloodGroup} onValueChange={(value) => setBloodRequest({...bloodRequest, bloodGroup: value})}>
-                    <SelectTrigger>
+                  <Label htmlFor="blood-group" className="dark:text-gray-200">Blood Group Needed *</Label>
+                  <Select value={bloodRequest.bloodGroup} onValueChange={(value) => setBloodRequest({...bloodRequest, bloodGroup: value})} required>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600">
                       <SelectValue placeholder="Select blood group" />
                     </SelectTrigger>
                     <SelectContent>
@@ -215,9 +381,25 @@ const PatientDashboard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="urgency">Urgency Level</Label>
-                  <Select value={bloodRequest.urgency} onValueChange={(value) => setBloodRequest({...bloodRequest, urgency: value})}>
-                    <SelectTrigger>
+                  <Label htmlFor="units-needed" className="dark:text-gray-200">Units Needed</Label>
+                  <Select value={bloodRequest.unitsNeeded} onValueChange={(value) => setBloodRequest({...bloodRequest, unitsNeeded: value})}>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600">
+                      <SelectValue placeholder="Select units" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 Unit</SelectItem>
+                      <SelectItem value="2">2 Units</SelectItem>
+                      <SelectItem value="3">3 Units</SelectItem>
+                      <SelectItem value="4">4 Units</SelectItem>
+                      <SelectItem value="5+">5+ Units</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="urgency" className="dark:text-gray-200">Urgency Level *</Label>
+                  <Select value={bloodRequest.urgency} onValueChange={(value) => setBloodRequest({...bloodRequest, urgency: value})} required>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600">
                       <SelectValue placeholder="Select urgency" />
                     </SelectTrigger>
                     <SelectContent>
@@ -229,56 +411,70 @@ const PatientDashboard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="location">Hospital/Location</Label>
+                  <Label htmlFor="location" className="dark:text-gray-200">Hospital/Location *</Label>
                   <Input
                     id="location"
                     placeholder="Enter hospital or location"
                     value={bloodRequest.location}
                     onChange={(e) => setBloodRequest({...bloodRequest, location: e.target.value})}
+                    className="dark:bg-gray-700 dark:border-gray-600"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="contact-person">Contact Person</Label>
+                  <Label htmlFor="contact-person" className="dark:text-gray-200">Contact Person *</Label>
                   <Input
                     id="contact-person"
                     placeholder="Enter contact person name"
                     value={bloodRequest.contactPerson}
                     onChange={(e) => setBloodRequest({...bloodRequest, contactPerson: e.target.value})}
+                    className="dark:bg-gray-700 dark:border-gray-600"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="contact-number">Contact Number</Label>
+                  <Label htmlFor="contact-number" className="dark:text-gray-200">Contact Number *</Label>
                   <Input
                     id="contact-number"
                     type="tel"
                     placeholder="Enter phone number"
                     value={bloodRequest.contactNumber}
                     onChange={(e) => setBloodRequest({...bloodRequest, contactNumber: e.target.value})}
+                    className="dark:bg-gray-700 dark:border-gray-600"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="additional-info">Additional Information</Label>
+                  <Label htmlFor="additional-info" className="dark:text-gray-200">Additional Information</Label>
                   <Textarea
                     id="additional-info"
                     placeholder="Any additional details..."
                     value={bloodRequest.additionalInfo}
                     onChange={(e) => setBloodRequest({...bloodRequest, additionalInfo: e.target.value})}
+                    className="dark:bg-gray-700 dark:border-gray-600"
                     rows={3}
                   />
                 </div>
 
                 <div className="flex space-x-2 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setShowBloodForm(false)} className="flex-1">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowBloodForm(false)} 
+                    className="flex-1"
+                    disabled={isLoading}
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" className="flex-1 bg-red-600 hover:bg-red-700">
-                    Submit Request
+                  <Button 
+                    type="submit" 
+                    className="flex-1 bg-red-600 hover:bg-red-700"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <LoadingSpinner size="sm" /> : 'Submit Request'}
                   </Button>
                 </div>
               </form>
@@ -289,10 +485,10 @@ const PatientDashboard = () => {
 
       {/* Ambulance Request Form Modal */}
       {showAmbulanceForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fade-in">
+          <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto dark:bg-gray-800">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 dark:text-white">
                 <Truck className="h-5 w-5 text-blue-600" />
                 <span>Request Ambulance</span>
               </CardTitle>
@@ -300,31 +496,33 @@ const PatientDashboard = () => {
             <CardContent>
               <form onSubmit={handleAmbulanceRequest} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="pickup-location">Pickup Location</Label>
+                  <Label htmlFor="pickup-location" className="dark:text-gray-200">Pickup Location *</Label>
                   <Input
                     id="pickup-location"
                     placeholder="Enter pickup address"
                     value={ambulanceRequest.pickupLocation}
                     onChange={(e) => setAmbulanceRequest({...ambulanceRequest, pickupLocation: e.target.value})}
+                    className="dark:bg-gray-700 dark:border-gray-600"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="destination">Destination Hospital</Label>
+                  <Label htmlFor="destination" className="dark:text-gray-200">Destination Hospital *</Label>
                   <Input
                     id="destination"
                     placeholder="Enter destination hospital"
                     value={ambulanceRequest.destination}
                     onChange={(e) => setAmbulanceRequest({...ambulanceRequest, destination: e.target.value})}
+                    className="dark:bg-gray-700 dark:border-gray-600"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="ambulance-urgency">Urgency Level</Label>
-                  <Select value={ambulanceRequest.urgency} onValueChange={(value) => setAmbulanceRequest({...ambulanceRequest, urgency: value})}>
-                    <SelectTrigger>
+                  <Label htmlFor="ambulance-urgency" className="dark:text-gray-200">Urgency Level *</Label>
+                  <Select value={ambulanceRequest.urgency} onValueChange={(value) => setAmbulanceRequest({...ambulanceRequest, urgency: value})} required>
+                    <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600">
                       <SelectValue placeholder="Select urgency" />
                     </SelectTrigger>
                     <SelectContent>
@@ -336,46 +534,71 @@ const PatientDashboard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="ambulance-contact-person">Contact Person</Label>
+                  <Label htmlFor="ambulance-contact-person" className="dark:text-gray-200">Contact Person *</Label>
                   <Input
                     id="ambulance-contact-person"
                     placeholder="Enter contact person name"
                     value={ambulanceRequest.contactPerson}
                     onChange={(e) => setAmbulanceRequest({...ambulanceRequest, contactPerson: e.target.value})}
+                    className="dark:bg-gray-700 dark:border-gray-600"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="ambulance-contact-number">Contact Number</Label>
+                  <Label htmlFor="ambulance-contact-number" className="dark:text-gray-200">Contact Number *</Label>
                   <Input
                     id="ambulance-contact-number"
                     type="tel"
                     placeholder="Enter phone number"
                     value={ambulanceRequest.contactNumber}
                     onChange={(e) => setAmbulanceRequest({...ambulanceRequest, contactNumber: e.target.value})}
+                    className="dark:bg-gray-700 dark:border-gray-600"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="patient-condition">Patient Condition</Label>
+                  <Label htmlFor="patient-condition" className="dark:text-gray-200">Patient Condition *</Label>
                   <Textarea
                     id="patient-condition"
                     placeholder="Describe the patient's condition..."
                     value={ambulanceRequest.patientCondition}
                     onChange={(e) => setAmbulanceRequest({...ambulanceRequest, patientCondition: e.target.value})}
+                    className="dark:bg-gray-700 dark:border-gray-600"
                     rows={3}
                     required
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="special-requirements" className="dark:text-gray-200">Special Requirements</Label>
+                  <Textarea
+                    id="special-requirements"
+                    placeholder="Any special medical equipment or requirements..."
+                    value={ambulanceRequest.specialRequirements}
+                    onChange={(e) => setAmbulanceRequest({...ambulanceRequest, specialRequirements: e.target.value})}
+                    className="dark:bg-gray-700 dark:border-gray-600"
+                    rows={2}
+                  />
+                </div>
+
                 <div className="flex space-x-2 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setShowAmbulanceForm(false)} className="flex-1">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowAmbulanceForm(false)} 
+                    className="flex-1"
+                    disabled={isLoading}
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
-                    Submit Request
+                  <Button 
+                    type="submit" 
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <LoadingSpinner size="sm" /> : 'Submit Request'}
                   </Button>
                 </div>
               </form>

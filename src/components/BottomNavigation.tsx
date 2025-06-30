@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, Search, Star, User } from 'lucide-react';
+import { Home, Search, Star, User, Users, HelpCircle } from 'lucide-react';
 
 interface BottomNavigationProps {
   activeTab: string;
@@ -12,12 +12,17 @@ const BottomNavigation = ({ activeTab, onTabChange, userRole }: BottomNavigation
   const getTabs = () => {
     const baseTabs = [
       { id: 'dashboard', label: 'Dashboard', icon: Home },
-      { id: 'requests', label: 'Requests', icon: Search },
+      { id: 'directory', label: 'Donors', icon: Users },
     ];
 
     if (userRole === 'donor') {
       baseTabs.push({ id: 'rewards', label: 'Rewards', icon: Star });
     }
+
+    baseTabs.push(
+      { id: 'profile', label: 'Profile', icon: User },
+      { id: 'help', label: 'Help', icon: HelpCircle }
+    );
 
     return baseTabs;
   };
@@ -25,7 +30,7 @@ const BottomNavigation = ({ activeTab, onTabChange, userRole }: BottomNavigation
   const tabs = getTabs();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2 md:hidden z-40 transition-colors duration-300">
       <div className="flex justify-around">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -35,14 +40,15 @@ const BottomNavigation = ({ activeTab, onTabChange, userRole }: BottomNavigation
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center space-y-1 p-2 rounded-lg transition-colors ${
+              className={`flex flex-col items-center space-y-1 p-2 rounded-lg transition-all duration-200 min-w-0 ${
                 isActive 
-                  ? 'text-red-600 bg-red-50' 
-                  : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                  ? 'text-red-600 bg-red-50 dark:bg-red-950 dark:text-red-400 scale-105' 
+                  : 'text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950'
               }`}
+              aria-label={tab.label}
             >
-              <Icon className="h-5 w-5" />
-              <span className="text-xs font-medium">{tab.label}</span>
+              <Icon className="h-5 w-5 flex-shrink-0" />
+              <span className="text-xs font-medium truncate">{tab.label}</span>
             </button>
           );
         })}
