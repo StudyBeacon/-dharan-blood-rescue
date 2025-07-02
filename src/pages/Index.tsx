@@ -6,11 +6,6 @@ import DonorDashboard from '@/components/DonorDashboard';
 import DriverDashboard from '@/components/DriverDashboard';
 import PatientDashboard from '@/components/PatientDashboard';
 import DonorDirectory from '@/components/DonorDirectory';
-import AdvancedSearch from '@/components/AdvancedSearch';
-import RewardsSystem from '@/components/RewardsSystem';
-import NotificationSystem from '@/components/NotificationSystem';
-import AnalyticsDashboard from '@/components/AnalyticsDashboard';
-import AccessibilityFeatures from '@/components/AccessibilityFeatures';
 import ProfileSettings from '@/components/ProfileSettings';
 import HelpSupport from '@/components/HelpSupport';
 import BottomNavigation from '@/components/BottomNavigation';
@@ -112,16 +107,6 @@ const Index = () => {
         }
       case 'directory':
         return <DonorDirectory />;
-      case 'search':
-        return <AdvancedSearch />;
-      case 'rewards':
-        return <RewardsSystem user={user} />;
-      case 'notifications':
-        return <NotificationSystem />;
-      case 'analytics':
-        return <AnalyticsDashboard />;
-      case 'accessibility':
-        return <AccessibilityFeatures />;
       case 'profile':
         return <ProfileSettings user={user} onUpdate={setUser} onDarkModeToggle={handleDarkModeToggle} darkMode={darkMode} />;
       case 'help':

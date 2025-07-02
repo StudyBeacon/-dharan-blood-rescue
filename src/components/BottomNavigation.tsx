@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Home, Search, Star, User, Users, HelpCircle, Bell } from 'lucide-react';
+import { Home, Search, Star, User, Users, HelpCircle } from 'lucide-react';
 
 interface BottomNavigationProps {
   activeTab: string;
@@ -12,7 +13,6 @@ const BottomNavigation = ({ activeTab, onTabChange, userRole }: BottomNavigation
     const baseTabs = [
       { id: 'dashboard', label: 'Dashboard', icon: Home },
       { id: 'directory', label: 'Donors', icon: Users },
-      { id: 'search', label: 'Search', icon: Search },
     ];
 
     if (userRole === 'donor') {
@@ -20,7 +20,7 @@ const BottomNavigation = ({ activeTab, onTabChange, userRole }: BottomNavigation
     }
 
     baseTabs.push(
-      { id: 'notifications', label: 'Alerts', icon: Bell },
+      { id: 'profile', label: 'Profile', icon: User },
       { id: 'help', label: 'Help', icon: HelpCircle }
     );
 
