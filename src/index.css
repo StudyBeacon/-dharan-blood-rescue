@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
@@ -50,7 +49,7 @@
   border: 0;
 }
 
-/* Custom animations */
+/* Enhanced animations */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -80,6 +79,47 @@
   }
 }
 
+@keyframes emergency-flash {
+  0%, 100% {
+    background-color: rgba(239, 68, 68, 0.1);
+  }
+  50% {
+    background-color: rgba(239, 68, 68, 0.3);
+  }
+}
+
+@keyframes data-flow {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.1);
+  }
+  28% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(1);
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }
@@ -92,13 +132,35 @@
   animation: pulse-glow 2s infinite;
 }
 
-/* Hover effects */
+.animate-emergency-flash {
+  animation: emergency-flash 1s infinite;
+}
+
+.animate-data-flow {
+  animation: data-flow 3s infinite;
+}
+
+.animate-heartbeat {
+  animation: heartbeat 2s infinite;
+}
+
+/* Enhanced hover effects */
 .hover-scale {
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .hover-scale:hover {
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.hover-lift {
+  transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* Loading spinner */
@@ -112,7 +174,7 @@
   animation: spin 1s linear infinite;
 }
 
-/* Blood drop animation */
+/* Enhanced blood drop animation */
 @keyframes blood-drop {
   0% {
     transform: translateY(-20px) scale(0.8);
@@ -137,91 +199,31 @@
   animation: pulse-glow 1s infinite;
 }
 
-/* Map styles */
-.mapboxgl-popup {
-  max-width: 300px;
+/* Real-time status indicators */
+.status-online {
+  position: relative;
 }
 
-.mapboxgl-popup-content {
-  border-radius: 8px;
-  padding: 16px;
-}
-
-/* Dark mode improvements */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-  }
-}
-
-/* High contrast mode */
-@media (prefers-contrast: high) {
-  .auto-high-contrast {
-    filter: contrast(200%);
-  }
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .respect-motion-preference * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  
-  .print-break {
-    page-break-after: always;
-  }
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
+.status-online::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 8px;
+  height: 8px;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
+.status-offline::after {
+  background: #ef4444;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Loading states */
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-/* Success/Error states */
-.success-glow {
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
-}
-
-.error-glow {
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+/* Notification badges */
+.notification-badge {
+  background: radial-gradient(circle, #ef4444, #dc2626);
+  animation: pulse 2s infinite;
 }
 
 /* Interactive elements */
@@ -229,12 +231,6 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.2s ease;
-}
-
-/* Notification styles */
-.notification-badge {
-  background: radial-gradient(circle, #ef4444, #dc2626);
-  animation: pulse 2s infinite;
 }
 
 /* Emergency button */
@@ -259,7 +255,7 @@
   left: 100%;
 }
 
-/* Blood compatibility indicator */
+/* Blood compatibility indicators */
 .compatible-indicator {
   background: linear-gradient(45deg, #22c55e, #16a34a);
   border-radius: 50%;
@@ -291,7 +287,100 @@
   }
 }
 
-/* Responsive improvements */
+/* Performance optimizations */
+.gpu-accelerated {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Custom scrollbar for modern look */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Enhanced skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Success/Error states with enhanced visual feedback */
+.success-glow {
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+  border: 2px solid rgba(34, 197, 94, 0.3);
+}
+
+.error-glow {
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+  border: 2px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Map enhancements */
+.map-container {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.map-pin {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+/* Analytics chart enhancements */
+.chart-container {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+}
+
+.dark .chart-container {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Mobile touch improvements */
 @media (max-width: 768px) {
   .mobile-optimized {
     font-size: 18px;
@@ -301,10 +390,52 @@
   .mobile-touch-target {
     min-height: 44px;
     min-width: 44px;
+    touch-action: manipulation;
   }
 }
 
-/* RTL support for future internationalization */
+/* High contrast mode improvements */
+@media (prefers-contrast: high) {
+  .auto-high-contrast {
+    filter: contrast(200%);
+  }
+  
+  .auto-high-contrast .text-gray-600 {
+    color: #000000 !important;
+  }
+  
+  .dark .auto-high-contrast .text-gray-300 {
+    color: #ffffff !important;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .respect-motion-preference * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print optimizations */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break {
+    page-break-after: always;
+  }
+  
+  .print-optimize {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+}
+
+/* RTL support for internationalization */
 [dir="rtl"] {
   direction: rtl;
   text-align: right;
@@ -312,4 +443,66 @@
 
 [dir="rtl"] .rtl-flip {
   transform: scaleX(-1);
+}
+
+/* WebSocket connection indicators */
+.ws-connected {
+  border-left: 4px solid #22c55e;
+}
+
+.ws-disconnected {
+  border-left: 4px solid #ef4444;
+}
+
+/* Offline mode styling */
+.offline-mode {
+  filter: grayscale(0.3);
+}
+
+.offline-indicator {
+  background: linear-gradient(45deg, #f59e0b, #d97706);
+  animation: pulse 2s infinite;
+}
+
+/* Production-ready animations */
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Performance monitoring indicators */
+.performance-good {
+  color: #22c55e;
+}
+
+.performance-warning {
+  color: #f59e0b;
+}
+
+.performance-critical {
+  color: #ef4444;
+  animation: pulse 1s infinite;
 }

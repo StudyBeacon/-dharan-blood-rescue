@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AuthForm from '@/components/AuthForm';
 import Header from '@/components/Header';
@@ -8,14 +7,22 @@ import PatientDashboard from '@/components/PatientDashboard';
 import DonorDirectory from '@/components/DonorDirectory';
 import AdvancedSearch from '@/components/AdvancedSearch';
 import RewardsSystem from '@/components/RewardsSystem';
+import EnhancedRewardsSystem from '@/components/EnhancedRewardsSystem';
 import NotificationSystem from '@/components/NotificationSystem';
+import RealTimeNotifications from '@/components/RealTimeNotifications';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import SmartAnalytics from '@/components/SmartAnalytics';
 import AccessibilityFeatures from '@/components/AccessibilityFeatures';
 import ProfileSettings from '@/components/ProfileSettings';
 import HelpSupport from '@/components/HelpSupport';
 import BottomNavigation from '@/components/BottomNavigation';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import MapIntegration from '@/components/MapIntegration';
+import EmergencySystem from '@/components/EmergencySystem';
+import ProductionFeatures from '@/components/ProductionFeatures';
 import { useToast } from '@/hooks/use-toast';
+import { useOfflineSupport } from '@/hooks/useOfflineSupport';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 const Index = () => {
   const [user, setUser] = useState<{
@@ -31,6 +38,10 @@ const Index = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  // Initialize offline support and WebSocket
+  const { isOnline, offlineData, pendingOperations } = useOfflineSupport();
+  const { isConnected: wsConnected, messages: wsMessages } = useWebSocket();
 
   // Initialize user session and dark mode
   useEffect(() => {
@@ -115,17 +126,28 @@ const Index = () => {
       case 'search':
         return <AdvancedSearch />;
       case 'rewards':
-        return <RewardsSystem user={user} />;
+        return <EnhancedRewardsSystem user={user} />;
       case 'notifications':
-        return <NotificationSystem />;
+        return (
+          <div className="space-y-6">
+            <RealTimeNotifications />
+            <NotificationSystem />
+          </div>
+        );
       case 'analytics':
-        return <AnalyticsDashboard />;
+        return <SmartAnalytics />;
       case 'accessibility':
         return <AccessibilityFeatures />;
       case 'profile':
         return <ProfileSettings user={user} onUpdate={setUser} onDarkModeToggle={handleDarkModeToggle} darkMode={darkMode} />;
       case 'help':
         return <HelpSupport />;
+      case 'map':
+        return <MapIntegration />;
+      case 'emergency':
+        return <EmergencySystem />;
+      case 'settings':
+        return <ProductionFeatures />;
       default:
         return renderContent();
     }
@@ -150,6 +172,20 @@ const Index = () => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        {/* Offline indicator */}
+        {!isOnline && (
+          <div className="bg-orange-600 text-white text-center py-2 text-sm">
+            ⚠️ You're offline. {pendingOperations} operations pending sync.
+          </div>
+        )}
+        
+        {/* WebSocket status */}
+        {!wsConnected && isOnline && (
+          <div className="bg-blue-600 text-white text-center py-1 text-xs">
+            📡 Connecting to live updates...
+          </div>
+        )}
+        
         <Header 
           user={user} 
           onLogout={handleLogout}
@@ -165,13 +201,21 @@ const Index = () => {
               {activeTab === 'dashboard' ? `${user.role} Dashboard` : 
                activeTab === 'directory' ? 'Donor Directory' :
                activeTab === 'profile' ? 'Profile & Settings' :
-               activeTab === 'help' ? 'Help & Support' : activeTab}
+               activeTab === 'help' ? 'Help & Support' :
+               activeTab === 'analytics' ? 'Smart Analytics' :
+               activeTab === 'emergency' ? 'Emergency System' :
+               activeTab === 'settings' ? 'Production Settings' :
+               activeTab === 'map' ? 'Live Map & Tracking' : activeTab}
             </h2>
             <p className="text-gray-600 dark:text-gray-300">
               {activeTab === 'dashboard' ? `Welcome back, ${user.name}` :
                activeTab === 'directory' ? 'Find blood donors in your area' :
                activeTab === 'profile' ? 'Manage your account settings' :
-               activeTab === 'help' ? 'Get help and support' : ''}
+               activeTab === 'help' ? 'Get help and support' :
+               activeTab === 'analytics' ? 'Advanced analytics and insights' :
+               activeTab === 'emergency' ? 'Emergency response coordination' :
+               activeTab === 'settings' ? 'Production-ready configurations' :
+               activeTab === 'map' ? 'Real-time tracking and navigation' : ''}
             </p>
           </div>
           
