@@ -1,10 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Smartphone, Download, Wifi, WifiOff, Bell, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+
+// Extend Window interface to include deferredPrompt
+declare global {
+  interface Window {
+    deferredPrompt?: any;
+  }
+}
 
 const PWAManager = () => {
   const [isInstallable, setIsInstallable] = useState(false);
@@ -48,7 +54,7 @@ const PWAManager = () => {
   }, []);
 
   const handleInstallPWA = async () => {
-    const promptEvent = (window as any).deferredPrompt;
+    const promptEvent = window.deferredPrompt;
     if (!promptEvent) return;
 
     promptEvent.prompt();
@@ -63,7 +69,7 @@ const PWAManager = () => {
       });
     }
     
-    (window as any).deferredPrompt = null;
+    window.deferredPrompt = null;
   };
 
   const requestNotificationPermission = async () => {
@@ -118,6 +124,13 @@ const PWAManager = () => {
         description: "App data has been refreshed",
       });
     }
+  };
+
+  const getRateLimitColor = () => {
+    const percentage = (0 / 100) * 100; // Simplified for now
+    if (percentage > 80) return 'text-red-600';
+    if (percentage > 60) return 'text-yellow-600';
+    return 'text-green-600';
   };
 
   return (
