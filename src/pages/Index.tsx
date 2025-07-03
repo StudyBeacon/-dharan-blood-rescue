@@ -20,6 +20,11 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import MapIntegration from '@/components/MapIntegration';
 import EmergencySystem from '@/components/EmergencySystem';
 import ProductionFeatures from '@/components/ProductionFeatures';
+import BreadcrumbNavigation from '@/components/BreadcrumbNavigation';
+import FormValidation from '@/components/FormValidation';
+import LiveChatSystem from '@/components/LiveChatSystem';
+import SessionManager from '@/components/SessionManager';
+import PWAManager from '@/components/PWAManager';
 import { useToast } from '@/hooks/use-toast';
 import { useOfflineSupport } from '@/hooks/useOfflineSupport';
 import { useWebSocket } from '@/hooks/useWebSocket';
@@ -124,7 +129,12 @@ const Index = () => {
       case 'directory':
         return <DonorDirectory />;
       case 'search':
-        return <AdvancedSearch />;
+        return (
+          <div className="space-y-6">
+            <AdvancedSearch />
+            <FormValidation />
+          </div>
+        );
       case 'rewards':
         return <EnhancedRewardsSystem user={user} />;
       case 'notifications':
@@ -132,6 +142,7 @@ const Index = () => {
           <div className="space-y-6">
             <RealTimeNotifications />
             <NotificationSystem />
+            <LiveChatSystem user={user} />
           </div>
         );
       case 'analytics':
@@ -139,7 +150,12 @@ const Index = () => {
       case 'accessibility':
         return <AccessibilityFeatures />;
       case 'profile':
-        return <ProfileSettings user={user} onUpdate={setUser} onDarkModeToggle={handleDarkModeToggle} darkMode={darkMode} />;
+        return (
+          <div className="space-y-6">
+            <ProfileSettings user={user} onUpdate={setUser} onDarkModeToggle={handleDarkModeToggle} darkMode={darkMode} />
+            <SessionManager user={user} onLogout={handleLogout} />
+          </div>
+        );
       case 'help':
         return <HelpSupport />;
       case 'map':
@@ -147,7 +163,12 @@ const Index = () => {
       case 'emergency':
         return <EmergencySystem />;
       case 'settings':
-        return <ProductionFeatures />;
+        return (
+          <div className="space-y-6">
+            <ProductionFeatures />
+            <PWAManager />
+          </div>
+        );
       default:
         return renderContent();
     }
@@ -196,6 +217,8 @@ const Index = () => {
         />
         
         <main className="container mx-auto px-4 py-6 pb-20 md:pb-6">
+          <BreadcrumbNavigation activeTab={activeTab} userRole={user.role} />
+          
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white capitalize animate-fade-in">
               {activeTab === 'dashboard' ? `${user.role} Dashboard` : 
@@ -210,11 +233,11 @@ const Index = () => {
             <p className="text-gray-600 dark:text-gray-300">
               {activeTab === 'dashboard' ? `Welcome back, ${user.name}` :
                activeTab === 'directory' ? 'Find blood donors in your area' :
-               activeTab === 'profile' ? 'Manage your account settings' :
+               activeTab === 'profile' ? 'Manage your account and session settings' :
                activeTab === 'help' ? 'Get help and support' :
                activeTab === 'analytics' ? 'Advanced analytics and insights' :
                activeTab === 'emergency' ? 'Emergency response coordination' :
-               activeTab === 'settings' ? 'Production-ready configurations' :
+               activeTab === 'settings' ? 'Production-ready configurations and PWA features' :
                activeTab === 'map' ? 'Real-time tracking and navigation' : ''}
             </p>
           </div>
