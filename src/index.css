@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
@@ -593,4 +592,93 @@
 [data-radix-popper-content-wrapper] > * {
   background-color: hsl(var(--popover)) !important;
   border: 1px solid hsl(var(--border)) !important;
+}
+
+/* Enhanced Mobile Responsiveness */
+.mobile-touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+}
+
+/* Mobile optimized text and spacing */
+.mobile-optimized {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .mobile-optimized {
+    font-size: 18px;
+    line-height: 1.7;
+  }
+  
+  /* Better touch targets on mobile */
+  .mobile-touch-target {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+  
+  /* Improved button spacing on mobile */
+  .space-y-2 > * + * {
+    margin-top: 0.75rem;
+  }
+  
+  /* Better modal sizing on mobile */
+  .fixed.inset-0 .max-w-md {
+    max-width: calc(100vw - 16px);
+    margin: 8px;
+  }
+  
+  /* Responsive grid improvements */
+  .grid-cols-1 {
+    gap: 12px;
+  }
+  
+  /* Better form input sizing */
+  input, textarea, select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Improved card padding on mobile */
+  .card-mobile {
+    padding: 12px;
+  }
+  
+  /* Better button groups on mobile */
+  .flex.space-x-2 {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .flex.space-x-2 > button {
+    width: 100%;
+  }
+  
+  /* Responsive text truncation */
+  .truncate-mobile {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .mobile-touch-target {
+    min-height: 40px;
+  }
+  
+  /* Better spacing for tablets */
+  .space-y-4 > * + * {
+    margin-top: 1.25rem;
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1025px) {
+  .mobile-touch-target {
+    min-height: 36px;
+  }
 }
