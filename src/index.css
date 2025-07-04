@@ -1,7 +1,76 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* CSS Custom Properties for shadcn/ui components */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    
+    /* Sidebar variables */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+    
+    /* Dark mode sidebar variables */
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 94.1%;
+    --sidebar-primary-foreground: 240 5.9% 10%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
 
 /* Base styles */
 :root {
@@ -299,43 +368,25 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: hsl(var(--muted));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: hsl(var(--border));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Dark mode scrollbar */
-.dark ::-webkit-scrollbar-track {
-  background: #374151;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #6b7280;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: hsl(var(--muted-foreground));
 }
 
 /* Enhanced skeleton loading */
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--border)) 50%, hsl(var(--muted)) 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
   border-radius: 4px;
-}
-
-.dark .skeleton {
-  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
-  background-size: 200% 100%;
 }
 
 @keyframes loading {
@@ -371,13 +422,9 @@
 
 /* Analytics chart enhancements */
 .chart-container {
-  background: rgba(255, 255, 255, 0.8);
+  background: hsl(var(--card));
   backdrop-filter: blur(10px);
   border-radius: 12px;
-}
-
-.dark .chart-container {
-  background: rgba(0, 0, 0, 0.8);
 }
 
 /* Mobile touch improvements */
@@ -396,16 +443,34 @@
 
 /* High contrast mode improvements */
 @media (prefers-contrast: high) {
-  .auto-high-contrast {
-    filter: contrast(200%);
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 0%;
+    --accent: 0 0% 90%;
+    --accent-foreground: 0 0% 0%;
+    --border: 0 0% 0%;
+    --input: 0 0% 90%;
   }
   
-  .auto-high-contrast .text-gray-600 {
-    color: #000000 !important;
-  }
-  
-  .dark .auto-high-contrast .text-gray-300 {
-    color: #ffffff !important;
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 100%;
+    --accent: 0 0% 10%;
+    --accent-foreground: 0 0% 100%;
+    --border: 0 0% 100%;
+    --input: 0 0% 10%;
   }
 }
 
@@ -505,4 +570,27 @@
 .performance-critical {
   color: #ef4444;
   animation: pulse 1s infinite;
+}
+
+/* Ensure all shadcn/ui components have proper backgrounds */
+.bg-background {
+  background-color: hsl(var(--background)) !important;
+}
+
+.bg-card {
+  background-color: hsl(var(--card)) !important;
+}
+
+.bg-popover {
+  background-color: hsl(var(--popover)) !important;
+}
+
+/* Fix dropdown and popover transparency issues */
+[data-radix-popper-content-wrapper] {
+  z-index: 50;
+}
+
+[data-radix-popper-content-wrapper] > * {
+  background-color: hsl(var(--popover)) !important;
+  border: 1px solid hsl(var(--border)) !important;
 }
