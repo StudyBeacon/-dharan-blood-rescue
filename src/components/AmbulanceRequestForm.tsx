@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Truck } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface AmbulanceRequestData {
   pickupLocation: string;
@@ -36,6 +36,8 @@ const AmbulanceRequestForm = ({
   onSubmit, 
   onClose 
 }: AmbulanceRequestFormProps) => {
+  const { t } = useTranslation();
+
   if (!isVisible) return null;
 
   return (
@@ -44,16 +46,16 @@ const AmbulanceRequestForm = ({
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center space-x-2 dark:text-white text-lg">
             <Truck className="h-5 w-5 text-blue-600" />
-            <span>Request Ambulance</span>
+            <span>{t('requestAmbulance')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="pickup-location" className="dark:text-gray-200 text-sm">Pickup Location *</Label>
+              <Label htmlFor="pickup-location" className="dark:text-gray-200 text-sm">{t('pickupLocation')} *</Label>
               <Input
                 id="pickup-location"
-                placeholder="Enter pickup address"
+                placeholder={t('enterLocation')}
                 value={ambulanceRequest.pickupLocation}
                 onChange={(e) => onAmbulanceRequestChange({...ambulanceRequest, pickupLocation: e.target.value})}
                 className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[44px]"
@@ -62,7 +64,7 @@ const AmbulanceRequestForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="destination" className="dark:text-gray-200 text-sm">Destination Hospital *</Label>
+              <Label htmlFor="destination" className="dark:text-gray-200 text-sm">{t('destination')} *</Label>
               <Input
                 id="destination"
                 placeholder="Enter destination hospital"
@@ -74,24 +76,24 @@ const AmbulanceRequestForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="ambulance-urgency" className="dark:text-gray-200 text-sm">Urgency Level *</Label>
+              <Label htmlFor="ambulance-urgency" className="dark:text-gray-200 text-sm">{t('urgency')} *</Label>
               <Select value={ambulanceRequest.urgency} onValueChange={(value) => onAmbulanceRequestChange({...ambulanceRequest, urgency: value})} required>
                 <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[44px]">
-                  <SelectValue placeholder="Select urgency" />
+                  <SelectValue placeholder={t('selectUrgency')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="emergency">Emergency (Life-threatening)</SelectItem>
-                  <SelectItem value="urgent">Urgent (Immediate care needed)</SelectItem>
-                  <SelectItem value="scheduled">Scheduled Transport</SelectItem>
+                  <SelectItem value="emergency">{t('emergency')} (Life-threatening)</SelectItem>
+                  <SelectItem value="urgent">{t('urgent')} (Immediate care needed)</SelectItem>
+                  <SelectItem value="scheduled">{t('scheduled')} Transport</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="ambulance-contact-person" className="dark:text-gray-200 text-sm">Contact Person *</Label>
+              <Label htmlFor="ambulance-contact-person" className="dark:text-gray-200 text-sm">{t('contactPerson')} *</Label>
               <Input
                 id="ambulance-contact-person"
-                placeholder="Enter contact person name"
+                placeholder={t('enterName')}
                 value={ambulanceRequest.contactPerson}
                 onChange={(e) => onAmbulanceRequestChange({...ambulanceRequest, contactPerson: e.target.value})}
                 className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[44px]"
@@ -100,11 +102,11 @@ const AmbulanceRequestForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="ambulance-contact-number" className="dark:text-gray-200 text-sm">Contact Number *</Label>
+              <Label htmlFor="ambulance-contact-number" className="dark:text-gray-200 text-sm">{t('contactNumber')} *</Label>
               <Input
                 id="ambulance-contact-number"
                 type="tel"
-                placeholder="Enter phone number"
+                placeholder={t('enterPhone')}
                 value={ambulanceRequest.contactNumber}
                 onChange={(e) => onAmbulanceRequestChange({...ambulanceRequest, contactNumber: e.target.value})}
                 className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[44px]"
@@ -113,7 +115,7 @@ const AmbulanceRequestForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="patient-condition" className="dark:text-gray-200 text-sm">Patient Condition *</Label>
+              <Label htmlFor="patient-condition" className="dark:text-gray-200 text-sm">{t('patientCondition')} *</Label>
               <Textarea
                 id="patient-condition"
                 placeholder="Describe the patient's condition..."
@@ -126,7 +128,7 @@ const AmbulanceRequestForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="special-requirements" className="dark:text-gray-200 text-sm">Special Requirements</Label>
+              <Label htmlFor="special-requirements" className="dark:text-gray-200 text-sm">{t('specialRequirements')}</Label>
               <Textarea
                 id="special-requirements"
                 placeholder="Any special medical equipment or requirements..."
@@ -145,14 +147,14 @@ const AmbulanceRequestForm = ({
                 className="flex-1 mobile-touch-target min-h-[44px]"
                 disabled={isLoading}
               >
-                Cancel
+                {t('cancel')}
               </Button>
               <Button 
                 type="submit" 
                 className="flex-1 bg-blue-600 hover:bg-blue-700 mobile-touch-target min-h-[44px]"
                 disabled={isLoading}
               >
-                {isLoading ? <LoadingSpinner size="sm" /> : 'Submit Request'}
+                {isLoading ? <LoadingSpinner size="sm" /> : t('submit')}
               </Button>
             </div>
           </form>

@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Heart, Truck, Clock, MapPin, Phone, Navigation } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface BloodRequest {
   id: number;
@@ -47,6 +47,8 @@ interface ActiveRequestsListProps {
 }
 
 const ActiveRequestsList = ({ requests }: ActiveRequestsListProps) => {
+  const { t } = useTranslation();
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
@@ -62,7 +64,7 @@ const ActiveRequestsList = ({ requests }: ActiveRequestsListProps) => {
       <CardHeader>
         <CardTitle className="flex items-center space-x-2 dark:text-white text-lg sm:text-xl">
           <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
-          <span>Active Requests</span>
+          <span>{t('activeRequests')}</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -79,7 +81,7 @@ const ActiveRequestsList = ({ requests }: ActiveRequestsListProps) => {
                         <Truck className="h-4 w-4 text-blue-600 flex-shrink-0" />
                       )}
                       <span className="truncate">
-                        {request.type === 'blood' ? 'Blood Request' : 'Ambulance Request'}
+                        {request.type === 'blood' ? t('bloodRequest') : t('ambulanceRequest')}
                       </span>
                     </h3>
                     
@@ -106,7 +108,7 @@ const ActiveRequestsList = ({ requests }: ActiveRequestsListProps) => {
                       
                       <div className="mt-2">
                         <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Progress:</span>
+                          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{t('progress')}:</span>
                           <span className="text-xs sm:text-sm font-medium dark:text-white">{Math.round(request.progress)}%</span>
                         </div>
                         <Progress value={request.progress} className="h-2" />
@@ -122,10 +124,10 @@ const ActiveRequestsList = ({ requests }: ActiveRequestsListProps) => {
                   {request.type === 'blood' ? (
                     <>
                       <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                        {request.responses} donors responded
+                        {request.responses} {t('responses')}
                       </span>
                       <Button variant="outline" size="sm" className="dark:border-gray-500 dark:text-gray-300 mobile-touch-target w-full sm:w-auto min-h-[44px] sm:min-h-[36px]">
-                        View Responses
+                        {t('viewResponses')}
                       </Button>
                     </>
                   ) : (
@@ -134,12 +136,12 @@ const ActiveRequestsList = ({ requests }: ActiveRequestsListProps) => {
                         {request.driverPhone && (
                           <Button variant="outline" size="sm" className="flex items-center justify-center space-x-1 mobile-touch-target min-h-[44px] sm:min-h-[36px]">
                             <Phone className="h-4 w-4" />
-                            <span>Call Driver</span>
+                            <span>{t('callDriver')}</span>
                           </Button>
                         )}
                         <Button size="sm" className="bg-blue-600 hover:bg-blue-700 mobile-touch-target min-h-[44px] sm:min-h-[36px] flex items-center justify-center">
                           <Navigation className="h-4 w-4 mr-1" />
-                          Track Live
+                          {t('trackLive')}
                         </Button>
                       </div>
                     </>
@@ -151,8 +153,8 @@ const ActiveRequestsList = ({ requests }: ActiveRequestsListProps) => {
         ) : (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <Clock className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-            <p className="text-sm sm:text-base">No active requests</p>
-            <p className="text-xs sm:text-sm">Your emergency requests will appear here</p>
+            <p className="text-sm sm:text-base">{t('noActiveRequests')}</p>
+            <p className="text-xs sm:text-sm">{t('emergencyRequestsAppear')}</p>
           </div>
         )}
       </CardContent>

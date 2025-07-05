@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@/hooks/useTranslation';
 import AmbulanceTracker from '@/components/AmbulanceTracker';
 import EmergencyActions from '@/components/EmergencyActions';
 import ActiveRequestsList from '@/components/ActiveRequestsList';
@@ -57,6 +58,7 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
   const [showAmbulanceForm, setShowAmbulanceForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const [activeRequests, setActiveRequests] = useState<ActiveRequest[]>([
     {
@@ -155,7 +157,7 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
       });
 
       toast({
-        title: "Blood Request Submitted",
+        title: t('bloodRequestSubmitted'),
         description: "Your blood request has been sent to nearby donors.",
       });
     } catch (error) {
@@ -210,8 +212,8 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
       });
 
       toast({
-        title: "Ambulance Requested",
-        description: "Emergency dispatch has been notified. Help is on the way.",
+        title: t('ambulanceRequested'),
+        description: t('helpOnWay'),
       });
     } catch (error) {
       toast({

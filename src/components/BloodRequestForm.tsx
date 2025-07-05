@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Heart } from 'lucide-react';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface BloodRequestData {
   bloodGroup: string;
@@ -36,6 +36,8 @@ const BloodRequestForm = ({
   onSubmit, 
   onClose 
 }: BloodRequestFormProps) => {
+  const { t } = useTranslation();
+
   if (!isVisible) return null;
 
   return (
@@ -44,16 +46,16 @@ const BloodRequestForm = ({
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center space-x-2 dark:text-white text-lg">
             <Heart className="h-5 w-5 text-red-600 fill-current" />
-            <span>Request Blood</span>
+            <span>{t('requestBlood')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="blood-group" className="dark:text-gray-200 text-sm">Blood Group Needed *</Label>
+              <Label htmlFor="blood-group" className="dark:text-gray-200 text-sm">{t('bloodGroup')} *</Label>
               <Select value={bloodRequest.bloodGroup} onValueChange={(value) => onBloodRequestChange({...bloodRequest, bloodGroup: value})} required>
                 <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[44px]">
-                  <SelectValue placeholder="Select blood group" />
+                  <SelectValue placeholder={t('selectBloodGroup')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="A+">A+</SelectItem>
@@ -69,7 +71,7 @@ const BloodRequestForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="units-needed" className="dark:text-gray-200 text-sm">Units Needed</Label>
+              <Label htmlFor="units-needed" className="dark:text-gray-200 text-sm">{t('unitsNeeded')}</Label>
               <Select value={bloodRequest.unitsNeeded} onValueChange={(value) => onBloodRequestChange({...bloodRequest, unitsNeeded: value})}>
                 <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[44px]">
                   <SelectValue placeholder="Select units" />
@@ -85,24 +87,24 @@ const BloodRequestForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="urgency" className="dark:text-gray-200 text-sm">Urgency Level *</Label>
+              <Label htmlFor="urgency" className="dark:text-gray-200 text-sm">{t('urgency')} *</Label>
               <Select value={bloodRequest.urgency} onValueChange={(value) => onBloodRequestChange({...bloodRequest, urgency: value})} required>
                 <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[44px]">
-                  <SelectValue placeholder="Select urgency" />
+                  <SelectValue placeholder={t('selectUrgency')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="critical">Critical (within 1 hour)</SelectItem>
-                  <SelectItem value="urgent">Urgent (within 6 hours)</SelectItem>
-                  <SelectItem value="moderate">Moderate (within 24 hours)</SelectItem>
+                  <SelectItem value="critical">{t('critical')} (within 1 hour)</SelectItem>
+                  <SelectItem value="urgent">{t('urgent')} (within 6 hours)</SelectItem>
+                  <SelectItem value="moderate">{t('moderate')} (within 24 hours)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location" className="dark:text-gray-200 text-sm">Hospital/Location *</Label>
+              <Label htmlFor="location" className="dark:text-gray-200 text-sm">{t('location')} *</Label>
               <Input
                 id="location"
-                placeholder="Enter hospital or location"
+                placeholder={t('enterLocation')}
                 value={bloodRequest.location}
                 onChange={(e) => onBloodRequestChange({...bloodRequest, location: e.target.value})}
                 className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[44px]"
@@ -111,10 +113,10 @@ const BloodRequestForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="contact-person" className="dark:text-gray-200 text-sm">Contact Person *</Label>
+              <Label htmlFor="contact-person" className="dark:text-gray-200 text-sm">{t('contactPerson')} *</Label>
               <Input
                 id="contact-person"
-                placeholder="Enter contact person name"
+                placeholder={t('enterName')}
                 value={bloodRequest.contactPerson}
                 onChange={(e) => onBloodRequestChange({...bloodRequest, contactPerson: e.target.value})}
                 className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[44px]"
@@ -123,11 +125,11 @@ const BloodRequestForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="contact-number" className="dark:text-gray-200 text-sm">Contact Number *</Label>
+              <Label htmlFor="contact-number" className="dark:text-gray-200 text-sm">{t('contactNumber')} *</Label>
               <Input
                 id="contact-number"
                 type="tel"
-                placeholder="Enter phone number"
+                placeholder={t('enterPhone')}
                 value={bloodRequest.contactNumber}
                 onChange={(e) => onBloodRequestChange({...bloodRequest, contactNumber: e.target.value})}
                 className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[44px]"
@@ -136,7 +138,7 @@ const BloodRequestForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="additional-info" className="dark:text-gray-200 text-sm">Additional Information</Label>
+              <Label htmlFor="additional-info" className="dark:text-gray-200 text-sm">{t('additionalInfo')}</Label>
               <Textarea
                 id="additional-info"
                 placeholder="Any additional details..."
@@ -155,14 +157,14 @@ const BloodRequestForm = ({
                 className="flex-1 mobile-touch-target min-h-[44px]"
                 disabled={isLoading}
               >
-                Cancel
+                {t('cancel')}
               </Button>
               <Button 
                 type="submit" 
                 className="flex-1 bg-red-600 hover:bg-red-700 mobile-touch-target min-h-[44px]"
                 disabled={isLoading}
               >
-                {isLoading ? <LoadingSpinner size="sm" /> : 'Submit Request'}
+                {isLoading ? <LoadingSpinner size="sm" /> : t('submit')}
               </Button>
             </div>
           </form>

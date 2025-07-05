@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, Truck, Plus } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface EmergencyActionsProps {
   onBloodRequest: () => void;
@@ -11,16 +12,18 @@ interface EmergencyActionsProps {
 }
 
 const EmergencyActions = ({ onBloodRequest, onAmbulanceRequest, isLoading }: EmergencyActionsProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
       <Card className="border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800 hover:shadow-lg transition-all duration-300 hover-scale">
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex items-center space-x-2 text-red-700 dark:text-red-300 text-lg sm:text-xl">
             <Heart className="h-5 w-5 sm:h-6 sm:w-6 fill-current animate-pulse" />
-            <span>Request Blood</span>
+            <span>{t('requestBlood')}</span>
           </CardTitle>
           <CardDescription className="dark:text-red-200 text-sm sm:text-base">
-            Find blood donors in your area quickly
+            {t('findDonors')}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
@@ -30,7 +33,7 @@ const EmergencyActions = ({ onBloodRequest, onAmbulanceRequest, isLoading }: Eme
             disabled={isLoading}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Request Blood
+            {t('requestBlood')}
           </Button>
         </CardContent>
       </Card>
@@ -39,7 +42,7 @@ const EmergencyActions = ({ onBloodRequest, onAmbulanceRequest, isLoading }: Eme
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex items-center space-x-2 text-blue-700 dark:text-blue-300 text-lg sm:text-xl">
             <Truck className="h-5 w-5 sm:h-6 sm:w-6" />
-            <span>Request Ambulance</span>
+            <span>{t('requestAmbulance')}</span>
           </CardTitle>
           <CardDescription className="dark:text-blue-200 text-sm sm:text-base">
             Get emergency medical transport
@@ -52,7 +55,7 @@ const EmergencyActions = ({ onBloodRequest, onAmbulanceRequest, isLoading }: Eme
             disabled={isLoading}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Request Ambulance
+            {t('requestAmbulance')}
           </Button>
         </CardContent>
       </Card>
