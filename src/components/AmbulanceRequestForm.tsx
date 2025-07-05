@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -67,7 +68,7 @@ const AmbulanceRequestForm = ({
               <Label htmlFor="destination" className="dark:text-gray-200 text-sm">{t('destination')} *</Label>
               <Input
                 id="destination"
-                placeholder="Enter destination hospital"
+                placeholder={t('enterDestination')}
                 value={ambulanceRequest.destination}
                 onChange={(e) => onAmbulanceRequestChange({...ambulanceRequest, destination: e.target.value})}
                 className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[44px]"
@@ -82,9 +83,9 @@ const AmbulanceRequestForm = ({
                   <SelectValue placeholder={t('selectUrgency')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="emergency">{t('emergency')} (Life-threatening)</SelectItem>
-                  <SelectItem value="urgent">{t('urgent')} (Immediate care needed)</SelectItem>
-                  <SelectItem value="scheduled">{t('scheduled')} Transport</SelectItem>
+                  <SelectItem value="emergency">{t('emergencyUrgency')} ({t('lifeThreatening')})</SelectItem>
+                  <SelectItem value="urgent">{t('urgent')} ({t('immediateCare')})</SelectItem>
+                  <SelectItem value="scheduled">{t('scheduledTransport')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -118,7 +119,7 @@ const AmbulanceRequestForm = ({
               <Label htmlFor="patient-condition" className="dark:text-gray-200 text-sm">{t('patientCondition')} *</Label>
               <Textarea
                 id="patient-condition"
-                placeholder="Describe the patient's condition..."
+                placeholder={t('describeCondition')}
                 value={ambulanceRequest.patientCondition}
                 onChange={(e) => onAmbulanceRequestChange({...ambulanceRequest, patientCondition: e.target.value})}
                 className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[88px]"
@@ -131,7 +132,7 @@ const AmbulanceRequestForm = ({
               <Label htmlFor="special-requirements" className="dark:text-gray-200 text-sm">{t('specialRequirements')}</Label>
               <Textarea
                 id="special-requirements"
-                placeholder="Any special medical equipment or requirements..."
+                placeholder={t('anySpecialRequirements')}
                 value={ambulanceRequest.specialRequirements}
                 onChange={(e) => onAmbulanceRequestChange({...ambulanceRequest, specialRequirements: e.target.value})}
                 className="dark:bg-gray-700 dark:border-gray-600 mobile-touch-target min-h-[66px]"

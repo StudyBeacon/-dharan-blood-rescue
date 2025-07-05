@@ -23,7 +23,7 @@ const EmergencyActions = ({ onBloodRequest, onAmbulanceRequest, isLoading }: Eme
             <span>{t('requestBlood')}</span>
           </CardTitle>
           <CardDescription className="dark:text-red-200 text-sm sm:text-base">
-            {t('findDonors')}
+            {t('bloodRequestDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
@@ -45,7 +45,7 @@ const EmergencyActions = ({ onBloodRequest, onAmbulanceRequest, isLoading }: Eme
             <span>{t('requestAmbulance')}</span>
           </CardTitle>
           <CardDescription className="dark:text-blue-200 text-sm sm:text-base">
-            Get emergency medical transport
+            {t('ambulanceRequestDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">

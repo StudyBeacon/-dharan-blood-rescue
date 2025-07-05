@@ -15,7 +15,7 @@ type TranslationKey =
   | 'critical' | 'urgent' | 'moderate' | 'bloodRequest' | 'findDonors'
   // Ambulance request  
   | 'pickupLocation' | 'destination' | 'patientCondition' | 'specialRequirements' | 'ambulanceRequest'
-  | 'emergency' | 'scheduled' | 'dispatching' | 'enRoute'
+  | 'emergencyUrgency' | 'scheduled' | 'dispatching' | 'enRoute'
   // Status & Progress
   | 'active' | 'completed' | 'pending' | 'progress' | 'responses' | 'estimatedTime'
   // Forms
@@ -25,7 +25,10 @@ type TranslationKey =
   // Dashboard titles
   | 'patientDashboard' | 'donorDashboard' | 'driverDashboard' | 'donorDirectory'
   // Common phrases
-  | 'noActiveRequests' | 'emergencyRequestsAppear' | 'trackLive' | 'callDriver' | 'viewResponses';
+  | 'noActiveRequests' | 'emergencyRequestsAppear' | 'trackLive' | 'callDriver' | 'viewResponses'
+  // Additional form fields
+  | 'enterDestination' | 'describeCondition' | 'anySpecialRequirements' | 'lifeThreatening' | 'immediateCare'
+  | 'scheduledTransport' | 'bloodRequestDescription' | 'ambulanceRequestDescription';
 
 const translations: Record<'en' | 'ne', Record<TranslationKey, string>> = {
   en: {
@@ -85,7 +88,7 @@ const translations: Record<'en' | 'ne', Record<TranslationKey, string>> = {
     patientCondition: 'Patient Condition',
     specialRequirements: 'Special Requirements',
     ambulanceRequest: 'Ambulance Request',
-    emergency: 'Emergency',
+    emergencyUrgency: 'Emergency',
     scheduled: 'Scheduled',
     dispatching: 'Dispatching',
     enRoute: 'En Route',
@@ -124,7 +127,17 @@ const translations: Record<'en' | 'ne', Record<TranslationKey, string>> = {
     emergencyRequestsAppear: 'Your emergency requests will appear here',
     trackLive: 'Track Live',
     callDriver: 'Call Driver',
-    viewResponses: 'View Responses'
+    viewResponses: 'View Responses',
+    
+    // Additional form fields
+    enterDestination: 'Enter destination hospital',
+    describeCondition: 'Describe the patient\'s condition...',
+    anySpecialRequirements: 'Any special medical equipment or requirements...',
+    lifeThreatening: 'Life-threatening',
+    immediateCare: 'Immediate care needed',
+    scheduledTransport: 'Scheduled Transport',
+    bloodRequestDescription: 'Find blood donors in your area quickly',
+    ambulanceRequestDescription: 'Get emergency medical transport'
   },
   ne: {
     // Navigation & Auth
@@ -183,7 +196,7 @@ const translations: Record<'en' | 'ne', Record<TranslationKey, string>> = {
     patientCondition: 'बिरामीको अवस्था',
     specialRequirements: 'विशेष आवश्यकताहरू',
     ambulanceRequest: 'एम्बुलेन्स अनुरोध',
-    emergency: 'आपातकाल',
+    emergencyUrgency: 'आपातकाल',
     scheduled: 'तालिकाबद्ध',
     dispatching: 'पठाउँदै',
     enRoute: 'बाटोमा',
@@ -222,7 +235,17 @@ const translations: Record<'en' | 'ne', Record<TranslationKey, string>> = {
     emergencyRequestsAppear: 'तपाईंका आपातकालीन अनुरोधहरू यहाँ देखा पर्नेछन्',
     trackLive: 'लाइभ ट्र्याक गर्नुहोस्',
     callDriver: 'चालकलाई फोन गर्नुहोस्',
-    viewResponses: 'जवाफहरू हेर्नुहोस्'
+    viewResponses: 'जवाफहरू हेर्नुहोस्',
+    
+    // Additional form fields
+    enterDestination: 'गन्तव्य अस्पताल प्रविष्ट गर्नुहोस्',
+    describeCondition: 'बिरामीको अवस्थाको वर्णन गर्नुहोस्...',
+    anySpecialRequirements: 'कुनै विशेष चिकित्सा उपकरण वा आवश्यकताहरू...',
+    lifeThreatening: 'जीवनलाई खतरा',
+    immediateCare: 'तुरुन्त हेरचाह आवश्यक',
+    scheduledTransport: 'तालिकाबद्ध यातायात',
+    bloodRequestDescription: 'तपाईंको क्षेत्रमा रगत दाताहरू छिट्टै फेला पार्नुहोस्',
+    ambulanceRequestDescription: 'आपातकालीन चिकित्सा यातायात प्राप्त गर्नुहोस्'
   }
 };
 
