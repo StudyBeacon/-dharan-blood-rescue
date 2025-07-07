@@ -89,23 +89,24 @@ const LoginForm = ({
         </Select>
       </div>
 
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-3 py-2">
         <Checkbox
           id="remember-me"
           checked={loginData.rememberMe}
           onCheckedChange={(checked) => 
             setLoginData({...loginData, rememberMe: checked as boolean})
           }
+          className="h-5 w-5 mobile-touch-target"
         />
         <Label 
           htmlFor="remember-me" 
-          className="text-sm font-normal cursor-pointer"
+          className="text-sm font-normal cursor-pointer select-none mobile-touch-target flex-1 py-2"
         >
           Remember me
         </Label>
       </div>
 
-      <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={isLoading}>
+      <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 mobile-touch-target" disabled={isLoading}>
         {isLoading ? 'Signing in...' : 'Sign In'}
       </Button>
     </form>
