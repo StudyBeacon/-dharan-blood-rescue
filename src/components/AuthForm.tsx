@@ -1,13 +1,14 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Phone, Mail, User, Lock } from 'lucide-react';
 import HealthcareLogo from '@/components/HealthcareLogo';
+import ForgotPasswordModal from '@/components/ForgotPasswordModal';
 
 interface AuthFormProps {
   onLogin: (role: 'donor' | 'driver' | 'patient', userData: any) => void;
@@ -16,10 +17,12 @@ interface AuthFormProps {
 
 const AuthForm = ({ onLogin, currentLanguage = 'en' }: AuthFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [loginData, setLoginData] = useState({
     email: '',
     password: '',
-    role: 'donor' as 'donor' | 'driver' | 'patient'
+    role: 'donor' as 'donor' | 'driver' | 'patient',
+    rememberMe: false
   });
 
   const [signupData, setSignupData] = useState({
@@ -35,6 +38,13 @@ const AuthForm = ({ onLogin, currentLanguage = 'en' }: AuthFormProps) => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // Store remember me preference
+    if (loginData.rememberMe) {
+      localStorage.setItem('bloodconnect_remember_email', loginData.email);
+    } else {
+      localStorage.removeItem('bloodconnect_remember_email');
+    }
     
     // Simulate API call
     setTimeout(() => {
@@ -67,6 +77,18 @@ const AuthForm = ({ onLogin, currentLanguage = 'en' }: AuthFormProps) => {
       setIsLoading(false);
     }, 1000);
   };
+
+  // Load remembered email on component mount
+  React.useEffect(() => {
+    const rememberedEmail = localStorage.getItem('bloodconnect_remember_email');
+    if (rememberedEmail) {
+      setLoginData(prev => ({
+        ...prev,
+        email: rememberedEmail,
+        rememberMe: true
+      }));
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center p-4">
@@ -127,6 +149,15 @@ const AuthForm = ({ onLogin, currentLanguage = 'en' }: AuthFormProps) => {
                         required
                       />
                     </div>
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotPassword(true)}
+                        className="text-sm text-red-600 hover:text-red-700 hover:underline transition-colors"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -141,6 +172,22 @@ const AuthForm = ({ onLogin, currentLanguage = 'en' }: AuthFormProps) => {
                         <SelectItem value="patient">Patient</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="remember-me"
+                      checked={loginData.rememberMe}
+                      onCheckedChange={(checked) => 
+                        setLoginData({...loginData, rememberMe: checked as boolean})
+                      }
+                    />
+                    <Label 
+                      htmlFor="remember-me" 
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      Remember me
+                    </Label>
                   </div>
 
                   <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={isLoading}>
@@ -274,6 +321,11 @@ const AuthForm = ({ onLogin, currentLanguage = 'en' }: AuthFormProps) => {
             </Tabs>
           </CardContent>
         </Card>
+
+        <ForgotPasswordModal 
+          isOpen={showForgotPassword}
+          onClose={() => setShowForgotPassword(false)}
+        />
       </div>
     </div>
   );
