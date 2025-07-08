@@ -95,7 +95,7 @@ const LoginForm = ({
           onCheckedChange={(checked) => 
             setLoginData({...loginData, rememberMe: checked as boolean})
           }
-          className="h-3 w-3 sm:h-4 sm:w-4"
+          className="h-3 w-3 sm:h-4 sm:w-1"
         />
         <Label 
           htmlFor="remember-me" 
