@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,24 +88,24 @@ const LoginForm = ({
         </Select>
       </div>
 
-      <div className="flex items-center space-x-2 py-1">
+      <div className="flex items-center space-x-2 sm:space-x-3 py-1 sm:py-2">
         <Checkbox
           id="remember-me"
           checked={loginData.rememberMe}
           onCheckedChange={(checked) => 
             setLoginData({...loginData, rememberMe: checked as boolean})
           }
-          className="h-4 w-4"
+          className="h-3 w-3 sm:h-4 sm:w-4"
         />
         <Label 
           htmlFor="remember-me" 
-          className="text-sm font-normal cursor-pointer select-none flex-1"
+          className="text-xs sm:text-sm font-normal cursor-pointer select-none flex-1"
         >
           Remember me
         </Label>
       </div>
 
-      <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 h-12 text-base" disabled={isLoading}>
+      <Button type="submit" className="w-full bg-red-600 hover:bg-red-700 h-10 sm:h-12 text-sm sm:text-base" disabled={isLoading}>
         {isLoading ? 'Signing in...' : 'Sign In'}
       </Button>
     </form>
