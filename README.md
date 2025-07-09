@@ -1,73 +1,34 @@
-# Welcome to your Lovable project
+# Dharan Blood Rescue — Emergency Response System
 
-## Project info
+A modern, real-time mobile and web app for managing **emergency blood requests** and **ambulance coordination** in Dharan, Nepal. This system connects patients, blood donors, hospitals, and ambulance drivers on a single responsive platform.
 
-**URL**: https://lovable.dev/projects/b52cf3d0-d9d2-4a61-8655-4649382ff021
+---
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+- 📍 Real-time ambulance tracking with Google Maps
+- 🩸 Emergency blood request forms with donor matching
+- 📲 Mobile-first design using React Native and ShadCN-UI
+- 🔔 Push notifications for urgent alerts
+- 👤 Separate dashboards for patients, donors, and drivers
+- 🔐 Role-based authentication
+- 🧩 Modular, scalable component structure
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b52cf3d0-d9d2-4a61-8655-4649382ff021) and start prompting.
+## 🛠 Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend:** Vite + TypeScript + React + ShadCN + Tailwind CSS
+- **Backend:** (Not included in this repo — designed to integrate with Django REST API)
+- **State Management:** TanStack Query (React Query)
+- **Notifications:** Toast and Sonner
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 📦 Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+git clone https://github.com/your-username/dharan-blood-rescue
+cd dharan-blood-rescue
+npm install
 npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/b52cf3d0-d9d2-4a61-8655-4649382ff021) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
