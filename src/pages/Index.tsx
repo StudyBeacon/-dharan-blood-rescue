@@ -1,120 +1,32 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import AuthForm from '@/components/AuthForm';
 import Header from '@/components/Header';
-import DonorDashboard from '@/components/DonorDashboard';
-import DriverDashboard from '@/components/DriverDashboard';
-import PatientDashboard from '@/components/PatientDashboard';
-import DonorDirectory from '@/components/DonorDirectory';
-import ProfileSettings from '@/components/ProfileSettings';
-import HelpSupport from '@/components/HelpSupport';
 import BottomNavigation from '@/components/BottomNavigation';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { useToast } from '@/hooks/use-toast';
+import BreadcrumbNavigation from '@/components/BreadcrumbNavigation';
+import StatusIndicators from '@/components/StatusIndicators';
+import PageHeader from '@/components/PageHeader';
+import MainContent from '@/components/MainContent';
+import { useAppState } from '@/hooks/useAppState';
 
 const Index = () => {
-  const [user, setUser] = useState<{
-    name: string;
-    email: string;
-    role: 'donor' | 'driver' | 'patient';
-    bloodGroup?: string;
-    id: string;
-  } | null>(null);
-  
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ne'>('en');
-  const [darkMode, setDarkMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
-
-  // Initialize user session and dark mode
-  useEffect(() => {
-    const savedUser = localStorage.getItem('bloodconnect_user');
-    const savedDarkMode = localStorage.getItem('bloodconnect_darkmode');
-    
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
-        localStorage.removeItem('bloodconnect_user');
-      }
-    }
-    
-    if (savedDarkMode) {
-      setDarkMode(JSON.parse(savedDarkMode));
-    } else {
-      // Auto-detect system preference
-      setDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
-    }
-    
-    setIsLoading(false);
-  }, []);
-
-  // Apply dark mode
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('bloodconnect_darkmode', JSON.stringify(darkMode));
-  }, [darkMode]);
-
-  const handleLogin = (role: 'donor' | 'driver' | 'patient', userData: any) => {
-    const userWithId = { ...userData, role, id: Date.now().toString() };
-    setUser(userWithId);
-    localStorage.setItem('bloodconnect_user', JSON.stringify(userWithId));
-    toast({
-      title: "Welcome back!",
-      description: `Logged in as ${role}`,
-    });
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    setActiveTab('dashboard');
-    localStorage.removeItem('bloodconnect_user');
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully",
-    });
-  };
-
-  const handleLanguageChange = (lang: 'en' | 'ne') => {
-    setCurrentLanguage(lang);
-    localStorage.setItem('bloodconnect_language', lang);
-  };
-
-  const handleDarkModeToggle = () => {
-    setDarkMode(!darkMode);
-  };
-
-  const renderContent = () => {
-    if (!user) return null;
-
-    switch (activeTab) {
-      case 'dashboard':
-        switch (user.role) {
-          case 'donor':
-            return <DonorDashboard user={user} />;
-          case 'driver':
-            return <DriverDashboard user={user} />;
-          case 'patient':
-            return <PatientDashboard user={user} />;
-          default:
-            return <DonorDashboard user={user} />;
-        }
-      case 'directory':
-        return <DonorDirectory />;
-      case 'profile':
-        return <ProfileSettings user={user} onUpdate={setUser} onDarkModeToggle={handleDarkModeToggle} darkMode={darkMode} />;
-      case 'help':
-        return <HelpSupport />;
-      default:
-        return renderContent();
-    }
-  };
+  const {
+    user,
+    setUser,
+    activeTab,
+    setActiveTab,
+    currentLanguage,
+    darkMode,
+    isLoading,
+    isOnline,
+    pendingOperations,
+    wsConnected,
+    handleLogin,
+    handleLogout,
+    handleLanguageChange,
+    handleDarkModeToggle
+  } = useAppState();
 
   if (isLoading) {
     return (
@@ -135,6 +47,12 @@ const Index = () => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <StatusIndicators 
+          isOnline={isOnline}
+          pendingOperations={pendingOperations}
+          wsConnected={wsConnected}
+        />
+        
         <Header 
           user={user} 
           onLogout={handleLogout}
@@ -145,22 +63,22 @@ const Index = () => {
         />
         
         <main className="container mx-auto px-4 py-6 pb-20 md:pb-6">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white capitalize animate-fade-in">
-              {activeTab === 'dashboard' ? `${user.role} Dashboard` : 
-               activeTab === 'directory' ? 'Donor Directory' :
-               activeTab === 'profile' ? 'Profile & Settings' :
-               activeTab === 'help' ? 'Help & Support' : activeTab}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              {activeTab === 'dashboard' ? `Welcome back, ${user.name}` :
-               activeTab === 'directory' ? 'Find blood donors in your area' :
-               activeTab === 'profile' ? 'Manage your account settings' :
-               activeTab === 'help' ? 'Get help and support' : ''}
-            </p>
-          </div>
+          <BreadcrumbNavigation activeTab={activeTab} userRole={user.role} />
           
-          {renderContent()}
+          <PageHeader 
+            activeTab={activeTab}
+            userName={user.name}
+            userRole={user.role}
+          />
+          
+          <MainContent
+            activeTab={activeTab}
+            user={user}
+            onUserUpdate={setUser}
+            onDarkModeToggle={handleDarkModeToggle}
+            darkMode={darkMode}
+            onLogout={handleLogout}
+          />
         </main>
 
         <BottomNavigation 
