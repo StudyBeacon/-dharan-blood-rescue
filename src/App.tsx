@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import DonorsPage from "./pages/donors"; // Add this import
 
 const queryClient = new QueryClient();
 
@@ -16,7 +17,11 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          
+          {/* Add your new Donors route here */}
+          <Route path="/donors" element={<DonorsPage />} />
+          
+          {/* Keep all other routes above the catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
