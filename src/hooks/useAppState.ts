@@ -14,7 +14,6 @@ export const useAppState = () => {
   } | null>(null);
   
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ne'>('en');
   const [darkMode, setDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -22,6 +21,12 @@ export const useAppState = () => {
   // Initialize offline support and WebSocket
   const { isOnline, offlineData, pendingOperations } = useOfflineSupport();
   const { isConnected: wsConnected, messages: wsMessages } = useWebSocket();
+
+  // Get current language from localStorage, matching useTranslation hook
+  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ne'>(() => {
+    const saved = localStorage.getItem('bloodconnect_language');
+    return (saved as 'en' | 'ne') || 'en';
+  });
 
   // Initialize user session and dark mode
   useEffect(() => {

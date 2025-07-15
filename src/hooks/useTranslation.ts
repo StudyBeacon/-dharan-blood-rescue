@@ -1,216 +1,275 @@
 
 import { useState, useEffect } from 'react';
 
-interface Translations {
-  [key: string]: {
-    en: string;
-    ne: string;
-  };
-}
-
-const translations: Translations = {
-  // Navigation
-  'nav.dashboard': {
-    en: 'Dashboard',
-    ne: 'ड्यासबोर्ड'
-  },
-  'nav.directory': {
-    en: 'Donor Directory',
-    ne: 'दाता निर्देशिका'
-  },
-  'nav.profile': {
-    en: 'Profile',
-    ne: 'प्रोफाइल'
-  },
-  'nav.help': {
-    en: 'Help',
-    ne: 'सहायता'
-  },
-  'nav.rewards': {
-    en: 'Rewards',
-    ne: 'पुरस्कार'
-  },
-
-  // Common actions
-  'common.login': {
-    en: 'Login',
-    ne: 'लगइन'
-  },
-  'common.signup': {
-    en: 'Sign Up',
-    ne: 'साइन अप'
-  },
-  'common.logout': {
-    en: 'Logout',
-    ne: 'लगआउट'
-  },
-  'common.save': {
-    en: 'Save',
-    ne: 'सुरक्षित गर्नुहोस्'
-  },
-  'common.cancel': {
-    en: 'Cancel',
-    ne: 'रद्द गर्नुहोस्'
-  },
-  'common.submit': {
-    en: 'Submit',
-    ne: 'पेश गर्नुहोस्'
-  },
-  'common.search': {
-    en: 'Search',
-    ne: 'खोज्नुहोस्'
-  },
-  'common.filter': {
-    en: 'Filter',
-    ne: 'फिल्टर'
-  },
-
-  // Blood donation
-  'blood.request': {
-    en: 'Request Blood',
-    ne: 'रगत माग्नुहोस्'
-  },
-  'blood.donate': {
-    en: 'Donate Blood',
-    ne: 'रगत दान गर्नुहोस्'
-  },
-  'blood.group': {
-    en: 'Blood Group',
-    ne: 'रगत समूह'
-  },
-  'blood.urgent': {
-    en: 'Urgent',
-    ne: 'जरुरी'
-  },
-  'blood.critical': {
-    en: 'Critical',
-    ne: 'अति जरुरी'
-  },
-
-  // Ambulance
-  'ambulance.request': {
-    en: 'Request Ambulance',
-    ne: 'एम्बुलेन्स माग्नुहोस्'
-  },
-  'ambulance.emergency': {
-    en: 'Emergency',
-    ne: 'आकस्मिक'
-  },
-  'ambulance.pickup': {
-    en: 'Pickup Location',
-    ne: 'उठाउने ठाउँ'
-  },
-  'ambulance.destination': {
-    en: 'Destination',
-    ne: 'गन्तव्य'
-  },
-
+type TranslationKey = 
+  // Navigation & Auth
+  | 'welcome' | 'login' | 'logout' | 'dashboard' | 'directory' | 'profile' | 'help' | 'analytics' | 'emergency' | 'settings' | 'map'
   // User roles
-  'role.donor': {
-    en: 'Blood Donor',
-    ne: 'रक्तदाता'
-  },
-  'role.driver': {
-    en: 'Ambulance Driver',
-    ne: 'एम्बुलेन्स ड्राइभर'
-  },
-  'role.patient': {
-    en: 'Patient',
-    ne: 'बिरामी'
-  },
-
+  | 'donor' | 'driver' | 'patient'
+  // Common actions
+  | 'submit' | 'cancel' | 'save' | 'edit' | 'delete' | 'view' | 'search' | 'filter' | 'call' | 'navigate'
+  // Emergency actions
+  | 'requestBlood' | 'requestAmbulance' | 'emergencyActions' | 'activeRequests'
+  // Blood request
+  | 'bloodGroup' | 'urgency' | 'location' | 'contactPerson' | 'contactNumber' | 'unitsNeeded' | 'additionalInfo'
+  | 'critical' | 'urgent' | 'moderate' | 'bloodRequest' | 'findDonors'
+  // Ambulance request  
+  | 'pickupLocation' | 'destination' | 'patientCondition' | 'specialRequirements' | 'ambulanceRequest'
+  | 'emergencyUrgency' | 'scheduled' | 'dispatching' | 'enRoute'
+  // Status & Progress
+  | 'active' | 'completed' | 'pending' | 'progress' | 'responses' | 'estimatedTime'
   // Forms
-  'form.name': {
-    en: 'Full Name',
-    ne: 'पूरा नाम'
-  },
-  'form.email': {
-    en: 'Email',
-    ne: 'इमेल'
-  },
-  'form.phone': {
-    en: 'Phone Number',
-    ne: 'फोन नम्बर'
-  },
-  'form.password': {
-    en: 'Password',
-    ne: 'पासवर्ड'
-  },
-  'form.address': {
-    en: 'Address',
-    ne: 'ठेगाना'
-  },
+  | 'required' | 'optional' | 'selectBloodGroup' | 'selectUrgency' | 'enterLocation' | 'enterName' | 'enterPhone'
+  // Messages
+  | 'bloodRequestSubmitted' | 'ambulanceRequested' | 'requestSubmitted' | 'helpOnWay'
+  // Dashboard titles
+  | 'patientDashboard' | 'donorDashboard' | 'driverDashboard' | 'donorDirectory'
+  // Common phrases
+  | 'noActiveRequests' | 'emergencyRequestsAppear' | 'trackLive' | 'callDriver' | 'viewResponses'
+  // Additional form fields
+  | 'enterDestination' | 'describeCondition' | 'anySpecialRequirements' | 'lifeThreatening' | 'immediateCare'
+  | 'scheduledTransport' | 'bloodRequestDescription' | 'ambulanceRequestDescription';
 
-  // Status
-  'status.available': {
-    en: 'Available',
-    ne: 'उपलब्ध'
+const translations: Record<'en' | 'ne', Record<TranslationKey, string>> = {
+  en: {
+    // Navigation & Auth
+    welcome: 'Welcome',
+    login: 'Login',
+    logout: 'Logout',
+    dashboard: 'Dashboard',
+    directory: 'Directory',
+    profile: 'Profile',
+    help: 'Help',
+    analytics: 'Analytics',
+    emergency: 'Emergency',
+    settings: 'Settings',
+    map: 'Map',
+    
+    // User roles
+    donor: 'Donor',
+    driver: 'Driver',
+    patient: 'Patient',
+    
+    // Common actions
+    submit: 'Submit',
+    cancel: 'Cancel',
+    save: 'Save',
+    edit: 'Edit',
+    delete: 'Delete',
+    view: 'View',
+    search: 'Search',
+    filter: 'Filter',
+    call: 'Call',
+    navigate: 'Navigate',
+    
+    // Emergency actions
+    requestBlood: 'Request Blood',
+    requestAmbulance: 'Request Ambulance',
+    emergencyActions: 'Emergency Actions',
+    activeRequests: 'Active Requests',
+    
+    // Blood request
+    bloodGroup: 'Blood Group',
+    urgency: 'Urgency',
+    location: 'Location',
+    contactPerson: 'Contact Person',
+    contactNumber: 'Contact Number',
+    unitsNeeded: 'Units Needed',
+    additionalInfo: 'Additional Information',
+    critical: 'Critical',
+    urgent: 'Urgent',
+    moderate: 'Moderate',
+    bloodRequest: 'Blood Request',
+    findDonors: 'Find blood donors in your area quickly',
+    
+    // Ambulance request
+    pickupLocation: 'Pickup Location',
+    destination: 'Destination',
+    patientCondition: 'Patient Condition',
+    specialRequirements: 'Special Requirements',
+    ambulanceRequest: 'Ambulance Request',
+    emergencyUrgency: 'Emergency',
+    scheduled: 'Scheduled',
+    dispatching: 'Dispatching',
+    enRoute: 'En Route',
+    
+    // Status & Progress
+    active: 'Active',
+    completed: 'Completed',
+    pending: 'Pending',
+    progress: 'Progress',
+    responses: 'responses',
+    estimatedTime: 'Estimated Time',
+    
+    // Forms
+    required: 'Required',
+    optional: 'Optional',
+    selectBloodGroup: 'Select blood group',
+    selectUrgency: 'Select urgency',
+    enterLocation: 'Enter location',
+    enterName: 'Enter name',
+    enterPhone: 'Enter phone number',
+    
+    // Messages
+    bloodRequestSubmitted: 'Blood Request Submitted',
+    ambulanceRequested: 'Ambulance Requested',
+    requestSubmitted: 'Your request has been submitted',
+    helpOnWay: 'Help is on the way',
+    
+    // Dashboard titles
+    patientDashboard: 'Patient Dashboard',
+    donorDashboard: 'Donor Dashboard',
+    driverDashboard: 'Driver Dashboard',
+    donorDirectory: 'Donor Directory',
+    
+    // Common phrases
+    noActiveRequests: 'No active requests',
+    emergencyRequestsAppear: 'Your emergency requests will appear here',
+    trackLive: 'Track Live',
+    callDriver: 'Call Driver',
+    viewResponses: 'View Responses',
+    
+    // Additional form fields
+    enterDestination: 'Enter destination hospital',
+    describeCondition: 'Describe the patient\'s condition...',
+    anySpecialRequirements: 'Any special medical equipment or requirements...',
+    lifeThreatening: 'Life-threatening',
+    immediateCare: 'Immediate care needed',
+    scheduledTransport: 'Scheduled Transport',
+    bloodRequestDescription: 'Find blood donors in your area quickly',
+    ambulanceRequestDescription: 'Get emergency medical transport'
   },
-  'status.busy': {
-    en: 'Busy',
-    ne: 'व्यस्त'
-  },
-  'status.active': {
-    en: 'Active',
-    ne: 'सक्रिय'
-  },
-  'status.completed': {
-    en: 'Completed',
-    ne: 'सम्पन्न'
-  },
-
-  // Notifications
-  'notification.new_request': {
-    en: 'New blood request received',
-    ne: 'नयाँ रगत अनुरोध प्राप्त भयो'
-  },
-  'notification.request_accepted': {
-    en: 'Your request has been accepted',
-    ne: 'तपाईंको अनुरोध स्वीकार गरिएको छ'
-  },
-  'notification.ambulance_dispatched': {
-    en: 'Ambulance has been dispatched',
-    ne: 'एम्बुलेन्स पठाइएको छ'
-  },
-
-  // Welcome messages
-  'welcome.donor': {
-    en: 'Welcome back, Hero!',
-    ne: 'फिर्ता स्वागत छ, नायक!'
-  },
-  'welcome.driver': {
-    en: 'Ready to save lives today?',
-    ne: 'आज जीवन बचाउन तयार हुनुहुन्छ?'
-  },
-  'welcome.patient': {
-    en: 'We are here to help you',
-    ne: 'हामी तपाईंलाई मद्दत गर्न यहाँ छौं'
+  ne: {
+    // Navigation & Auth
+    welcome: 'स्वागतम्',
+    login: 'लगइन',
+    logout: 'लगआउट',
+    dashboard: 'ड्यासबोर्ड',
+    directory: 'डाइरेक्टरी',
+    profile: 'प्रोफाइल',
+    help: 'सहायता',
+    analytics: 'एनालिटिक्स',
+    emergency: 'आपातकाल',
+    settings: 'सेटिङ्गहरू',
+    map: 'नक्सा',
+    
+    // User roles
+    donor: 'दाता',
+    driver: 'चालक',
+    patient: 'बिरामी',
+    
+    // Common actions
+    submit: 'पेश गर्नुहोस्',
+    cancel: 'रद्द गर्नुहोस्',
+    save: 'सेभ गर्नुहोस्',
+    edit: 'सम्पादन गर्नुहोस्',
+    delete: 'मेटाउनुहोस्',
+    view: 'हेर्नुहोस्',
+    search: 'खोज्नुहोस्',
+    filter: 'फिल्टर गर्नुहोस्',
+    call: 'फोन गर्नुहोस्',
+    navigate: 'नेभिगेट गर्नुहोस्',
+    
+    // Emergency actions
+    requestBlood: 'रगत माग्नुहोस्',
+    requestAmbulance: 'एम्बुलेन्स माग्नुहोस्',
+    emergencyActions: 'आपातकालीन कार्यहरू',
+    activeRequests: 'सक्रिय अनुरोधहरू',
+    
+    // Blood request
+    bloodGroup: 'रगत समूह',
+    urgency: 'जरुरीता',
+    location: 'स्थान',
+    contactPerson: 'सम्पर्क व्यक्ति',
+    contactNumber: 'सम्पर्क नम्बर',
+    unitsNeeded: 'आवश्यक एकाइ',
+    additionalInfo: 'थप जानकारी',
+    critical: 'गम्भीर',
+    urgent: 'जरुरी',
+    moderate: 'मध्यम',
+    bloodRequest: 'रगत अनुरोध',
+    findDonors: 'तपाईंको क्षेत्रमा रगत दाताहरू छिट्टै फेला पार्नुहोस्',
+    
+    // Ambulance request
+    pickupLocation: 'उठाउने स्थान',
+    destination: 'गन्तव्य',
+    patientCondition: 'बिरामीको अवस्था',
+    specialRequirements: 'विशेष आवश्यकताहरू',
+    ambulanceRequest: 'एम्बुलेन्स अनुरोध',
+    emergencyUrgency: 'आपातकाल',
+    scheduled: 'तालिकाबद्ध',
+    dispatching: 'पठाउँदै',
+    enRoute: 'बाटोमा',
+    
+    // Status & Progress
+    active: 'सक्रिय',
+    completed: 'पूरा भएको',
+    pending: 'बाँकी',
+    progress: 'प्रगति',
+    responses: 'जवाफहरू',
+    estimatedTime: 'अनुमानित समय',
+    
+    // Forms
+    required: 'आवश्यक',
+    optional: 'वैकल्पिक',
+    selectBloodGroup: 'रगत समूह छान्नुहोस्',
+    selectUrgency: 'जरुरीता छान्नुहोस्',
+    enterLocation: 'स्थान प्रविष्ट गर्नुहोस्',
+    enterName: 'नाम प्रविष्ट गर्नुहोस्',
+    enterPhone: 'फोन नम्बर प्रविष्ट गर्नुहोस्',
+    
+    // Messages
+    bloodRequestSubmitted: 'रगत अनुरोध पेश गरियो',
+    ambulanceRequested: 'एम्बुलेन्स अनुरोध गरियो',
+    requestSubmitted: 'तपाईंको अनुरोध पेश गरियो',
+    helpOnWay: 'सहायता आउँदैछ',
+    
+    // Dashboard titles
+    patientDashboard: 'बिरामी ड्यासबोर्ड',
+    donorDashboard: 'दाता ड्यासबोर्ड',
+    driverDashboard: 'चालक ड्यासबोर्ड',
+    donorDirectory: 'दाता डाइरेक्टरी',
+    
+    // Common phrases
+    noActiveRequests: 'कुनै सक्रिय अनुरोधहरू छैनन्',
+    emergencyRequestsAppear: 'तपाईंका आपातकालीन अनुरोधहरू यहाँ देखा पर्नेछन्',
+    trackLive: 'लाइभ ट्र्याक गर्नुहोस्',
+    callDriver: 'चालकलाई फोन गर्नुहोस्',
+    viewResponses: 'जवाफहरू हेर्नुहोस्',
+    
+    // Additional form fields
+    enterDestination: 'गन्तव्य अस्पताल प्रविष्ट गर्नुहोस्',
+    describeCondition: 'बिरामीको अवस्थाको वर्णन गर्नुहोस्...',
+    anySpecialRequirements: 'कुनै विशेष चिकित्सा उपकरण वा आवश्यकताहरू...',
+    lifeThreatening: 'जीवनलाई खतरा',
+    immediateCare: 'तुरुन्त हेरचाह आवश्यक',
+    scheduledTransport: 'तालिकाबद्ध यातायात',
+    bloodRequestDescription: 'तपाईंको क्षेत्रमा रगत दाताहरू छिट्टै फेला पार्नुहोस्',
+    ambulanceRequestDescription: 'आपातकालीन चिकित्सा यातायात प्राप्त गर्नुहोस्'
   }
 };
 
 export const useTranslation = () => {
-  const [language, setLanguage] = useState<'en' | 'ne'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ne'>(() => {
+    const saved = localStorage.getItem('bloodconnect_language');
+    return (saved as 'en' | 'ne') || 'en';
+  });
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('bloodconnect_language') as 'en' | 'ne';
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-    }
-  }, []);
+    localStorage.setItem('bloodconnect_language', currentLanguage);
+  }, [currentLanguage]);
 
-  const t = (key: string): string => {
-    return translations[key]?.[language] || translations[key]?.en || key;
+  const t = (key: TranslationKey): string => {
+    return translations[currentLanguage][key] || key;
   };
 
-  const changeLanguage = (newLanguage: 'en' | 'ne') => {
-    setLanguage(newLanguage);
-    localStorage.setItem('bloodconnect_language', newLanguage);
+  const changeLanguage = (lang: 'en' | 'ne') => {
+    setCurrentLanguage(lang);
   };
 
   return {
     t,
-    language,
-    changeLanguage,
-    isNepali: language === 'ne'
+    currentLanguage,
+    changeLanguage
   };
 };

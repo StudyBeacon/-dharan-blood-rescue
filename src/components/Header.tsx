@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Bell, User, Menu, Globe, LogOut, Settings, Search, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import HealthcareLogo from '@/components/HealthcareLogo';
 
 interface HeaderProps {
   user: {
@@ -40,11 +40,7 @@ const Header = ({ user, onLogout, onLanguageChange, currentLanguage, activeTab, 
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-              <div className="w-4 h-4 bg-white rounded-full relative">
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-600 rounded-full"></div>
-              </div>
-            </div>
+            <HealthcareLogo size={32} />
             <div>
               <h1 className="text-lg font-bold text-gray-900 dark:text-white">BloodConnect</h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">Dharan Emergency System</p>
