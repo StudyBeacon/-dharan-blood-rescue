@@ -10,7 +10,11 @@ There are several ways of editing your application.
 
 **Use Lovable**
 
+<<<<<<< HEAD
 Simply visit the [Lovable Project](https://lovable.dev/projects/b52cf3d0-d9d2-4a61-8655-4649382ff021) and start prompting.
+=======
+## 🛠 Tech Stackto
+>>>>>>> 74b943e (backend)
 
 Changes made via Lovable will be committed automatically to this repo.
 
