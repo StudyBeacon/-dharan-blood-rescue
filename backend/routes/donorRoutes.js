@@ -45,5 +45,8 @@ router.patch('/:id/availability', async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+// if (!req.body.name || !req.body.bloodGroup) {
+//   return res.status(400).json({ error: "Missing required fields" });
+// }
 
 module.exports = router;
