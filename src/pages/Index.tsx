@@ -1,93 +1,83 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import AuthForm from '@/components/AuthForm';
 import Header from '@/components/Header';
+import DonorDashboard from '@/components/DonorDashboard';
+import DriverDashboard from '@/components/DriverDashboard';
+import PatientDashboard from '@/components/PatientDashboard';
 import BottomNavigation from '@/components/BottomNavigation';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import BreadcrumbNavigation from '@/components/BreadcrumbNavigation';
-import StatusIndicators from '@/components/StatusIndicators';
-import PageHeader from '@/components/PageHeader';
-import MainContent from '@/components/MainContent';
-import { useAppState } from '@/hooks/useAppState';
 
 const Index = () => {
-  const {
-    user,
-    setUser,
-    activeTab,
-    setActiveTab,
-    currentLanguage,
-    darkMode,
-    isLoading,
-    isOnline,
-    pendingOperations,
-    wsConnected,
-    handleLogin,
-    handleLogout,
-    handleLanguageChange,
-    handleDarkModeToggle
-  } = useAppState();
+  const [user, setUser] = useState<{
+    name: string;
+    email: string;
+    role: 'donor' | 'driver' | 'patient';
+    bloodGroup?: string;
+  } | null>(null);
+  
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ne'>('en');
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
-      </div>
-    );
-  }
+  const handleLogin = (role: 'donor' | 'driver' | 'patient', userData: any) => {
+    setUser({ ...userData, role });
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setActiveTab('dashboard');
+  };
+
+  const handleLanguageChange = (lang: 'en' | 'ne') => {
+    setCurrentLanguage(lang);
+  };
+
+  const renderDashboard = () => {
+    if (!user) return null;
+
+    switch (user.role) {
+      case 'donor':
+        return <DonorDashboard />;
+      case 'driver':
+        return <DriverDashboard />;
+      case 'patient':
+        return <PatientDashboard />;
+      default:
+        return <DonorDashboard />;
+    }
+  };
 
   if (!user) {
-    return (
-      <ErrorBoundary>
-        <AuthForm onLogin={handleLogin} currentLanguage={currentLanguage} />
-      </ErrorBoundary>
-    );
+    return <AuthForm onLogin={handleLogin} />;
   }
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-        <StatusIndicators 
-          isOnline={isOnline}
-          pendingOperations={pendingOperations}
-          wsConnected={wsConnected}
-        />
+    <div className="min-h-screen bg-gray-50">
+      <Header 
+        user={user} 
+        onLogout={handleLogout}
+        onLanguageChange={handleLanguageChange}
+        currentLanguage={currentLanguage}
+      />
+      
+      <main className="container mx-auto px-4 py-6 pb-20 md:pb-6">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 capitalize">
+            {user.role} Dashboard
+          </h2>
+          <p className="text-gray-600">
+            Welcome back, {user.name}
+          </p>
+        </div>
         
-        <Header 
-          user={user} 
-          onLogout={handleLogout}
-          onLanguageChange={handleLanguageChange}
-          currentLanguage={currentLanguage}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
-        
-        <main className="container mx-auto px-4 py-6 pb-20 md:pb-6">
-          <BreadcrumbNavigation activeTab={activeTab} userRole={user.role} />
-          
-          <PageHeader 
-            activeTab={activeTab}
-            userName={user.name}
-            userRole={user.role}
-          />
-          
-          <MainContent
-            activeTab={activeTab}
-            user={user}
-            onUserUpdate={setUser}
-            onDarkModeToggle={handleDarkModeToggle}
-            darkMode={darkMode}
-            onLogout={handleLogout}
-          />
-        </main>
+        {renderDashboard()}
+      </main>
 
-        <BottomNavigation 
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          userRole={user.role}
-        />
-      </div>
-    </ErrorBoundary>
+      <BottomNavigation 
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        userRole={user.role}
+      />
+    </div>
   );
 };
 
