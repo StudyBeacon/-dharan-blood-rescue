@@ -1,12 +1,24 @@
-const router = require('express').Router();
-const {
-  createBloodRequest,
-  getActiveRequests
-} = require('../../controllers/patientController');
-const auth = require('../../utils/auth');
+const express = require('express');
+const router = express.Router();
+const { verifyToken } = require('../../utils/auth');
+const patientController = require('../../controllers/patientController');
 
-router.use(auth.verifyToken);
-router.get('/requests', getActiveRequests);
-router.post('/blood-requests', createBloodRequest);
+// Protect all patient routes
+router.use(verifyToken);
+
+// @route   POST api/patient/requests
+// @desc    Create blood request
+// @access  Private
+router.post('/requests', patientController.createBloodRequest);
+
+// @route   GET api/patient/requests
+// @desc    Get patient's blood requests
+// @access  Private
+router.get('/requests', patientController.getMyRequests);
+
+// @route   PUT api/patient/requests/:id/cancel
+// @desc    Cancel blood request
+// @access  Private
+router.put('/requests/:id/cancel', patientController.cancelRequest);
 
 module.exports = router;
