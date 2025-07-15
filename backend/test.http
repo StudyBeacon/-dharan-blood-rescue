@@ -1,0 +1,9 @@
+POST http://localhost:5000/api/donors
+Content-Type: application/json
+
+{
+  "name": "Yogesh Rai",
+  "bloodGroup": "O+", 
+  "phone": "9827967296",
+  "location": "Dharan"
+}
