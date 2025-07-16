@@ -3,127 +3,167 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const mongoose = require('mongoose');
-const connectDB = require('./config/db');
-const { globalErrorHandler } = require('./utils/errorHandler');
-const socketService = require('./services/socket');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const socketService = require('./services/socket');
+const { globalErrorHandler } = require('./utils/errorHandler');
 
-// Create Express app
+// Constants
+const PORT = process.env.PORT || 5000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const CLIENT_URL = NODE_ENV === 'production' 
+  ? process.env.CLIENT_URL 
+  : 'http://localhost:3000';
+
+// Database Connection
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 30000,
+      maxPoolSize: 50,
+      retryWrites: true,
+      w: 'majority'
+    });
+    console.log('✅ MongoDB connected successfully');
+  } catch (err) {
+    console.error('❌ MongoDB connection failed:', err.message);
+    process.exit(1);
+  }
+};
+
+// Express App
 const app = express();
 const server = http.createServer(app);
 
-// Initialize Socket.io
-socketService.init(server);
-
-// Connect to MongoDB
-connectDB();
-
-// Set security HTTP headers
-app.use(helmet());
-
-// Enable CORS
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
+// 1. Security Middlewares
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      connectSrc: ["'self'", CLIENT_URL]
+    }
+  },
+  crossOriginEmbedderPolicy: false
 }));
 
-// Limit requests from same API
-const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: 'Too many requests from this IP, please try again in an hour!'
-});
-app.use('/api', limiter);
+app.use(cors({
+  origin: CLIENT_URL,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
+}));
 
-// Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// Data sanitization against NoSQL query injection
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api', limiter);
+
+// Data Sanitization
 app.use(mongoSanitize());
-
-// Data sanitization against XSS
 app.use(xss());
-
-// Prevent parameter pollution
 app.use(hpp({
-  whitelist: [
-    'bloodGroup',
-    'urgency',
-    'status'
-  ]
+  whitelist: ['bloodGroup', 'urgency', 'status']
 }));
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+// 2. Initialize Socket.io
+socketService.init(server);
 
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
-  });
-}
+// 3. Routes
+app.get('/api/health', (req, res) => res.status(200).json({ 
+  status: 'healthy',
+  timestamp: new Date(),
+  dbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+}));
 
-// Test route
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    message: 'BloodConnect API is running',
-    timestamp: new Date(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
-
-// API Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/donor', require('./routes/donor'));
 app.use('/api/patient', require('./routes/patient'));
 app.use('/api/driver', require('./routes/driver'));
 app.use('/api/requests', require('./routes/shared/requests'));
+// Add this with your other routes
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Welcome to BloodConnect API',
+    endpoints: {
+      auth: '/api/auth',
+      donor: '/api/donor',
+      patient: '/api/patient',
+      driver: '/api/driver'
+    }
+  });
+});
 
-// Handle 404 routes
-app.all('*', (req, res, next) => {
+// 4. Static Files (Production)
+if (NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/build')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build/index.html'));
+  });
+}
+
+// 5. Error Handling
+app.all('*', (req, res) => {
   res.status(404).json({
     status: 'fail',
     message: `Can't find ${req.originalUrl} on this server!`
   });
 });
-
-// Global error handler
 app.use(globalErrorHandler);
 
-// Start server
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+// 6. Graceful Shutdown
+const gracefulShutdown = () => {
+  console.log('🛑 Received shutdown signal. Starting graceful shutdown...');
+  
+  server.close(async () => {
+    console.log('🔒 HTTP server closed');
+    
+    await mongoose.connection.close(false);
+    console.log('🗄️  MongoDB connection closed');
+    
+    process.exit(0);
+  });
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.error(err.name, err.message);
-  server.close(() => {
+  // Force shutdown after 10 seconds
+  setTimeout(() => {
+    console.error('⏰ Could not close connections in time, forcing shutdown');
     process.exit(1);
-  });
-});
+  }, 10000);
+};
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-  console.error(err.name, err.message);
-  server.close(() => {
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+
+// 7. Start Server
+const startServer = async () => {
+  try {
+    await connectDB();
+    
+    server.listen(PORT, () => {
+      console.log(`
+        🚀 BloodConnect API running in ${NODE_ENV} mode
+        📡 Listening on port ${PORT}
+        🗄️  Database: ${mongoose.connection.readyState === 1 ? '✅ Connected' : '❌ Disconnected'}
+        ⏰ Started at: ${new Date().toLocaleString()}
+        🌐 CORS Enabled for: ${CLIENT_URL}
+      `);
+    });
+
+  } catch (err) {
+    console.error('❌ Server startup failed:', err);
     process.exit(1);
-  });
-});
+  }
+};
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
-  server.close(() => {
-    console.log('💥 Process terminated!');
-  });
-});
+startServer();
