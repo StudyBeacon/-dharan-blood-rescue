@@ -81,3 +81,15 @@ exports.acceptRequest = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+exports.registerDonor = async (req, res) => {
+  try {
+    // If user id required, validate it here or ensure valid ObjectId is passed
+    const donor = new Donor(req.body);
+    await donor.save();
+    res.status(201).json(donor);
+  } catch (error) {
+    console.error("Error registering donor:", error);  // log full error object for debugging
+    res.status(500).json({ error: "Failed to register donor", details: error.message });
+  }
+};
