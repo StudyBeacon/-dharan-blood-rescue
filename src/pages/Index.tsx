@@ -1,13 +1,13 @@
-import React from 'react';
-import AuthForm from '@/components/AuthForm';
-import Header from '@/components/Header';
-import BottomNavigation from '@/components/BottomNavigation';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import BreadcrumbNavigation from '@/components/BreadcrumbNavigation';
-import StatusIndicators from '@/components/StatusIndicators';
-import PageHeader from '@/components/PageHeader';
-import MainContent from '@/components/MainContent';
-import { useAppState } from '@/hooks/useAppState';
+import React from "react";
+import AuthForm from "@/components/AuthForm";
+import Header from "@/components/Header";
+import BottomNavigation from "@/components/BottomNavigation";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import BreadcrumbNavigation from "@/components/BreadcrumbNavigation";
+import StatusIndicators from "@/components/StatusIndicators";
+import PageHeader from "@/components/PageHeader";
+import MainContent from "@/components/MainContent";
+import { useAppState } from "@/hooks/useAppState";
 
 const Index: React.FC = () => {
   const {
@@ -52,8 +52,8 @@ const Index: React.FC = () => {
           wsConnected={wsConnected}
         />
 
+        {/*user={user}*/}
         <Header
-          user={user}
           onLogout={handleLogout}
           onLanguageChange={handleLanguageChange}
           currentLanguage={currentLanguage}

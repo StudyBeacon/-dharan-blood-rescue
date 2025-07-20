@@ -1,31 +1,31 @@
 // src/components/LoginForm.tsx
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import { Mail, Lock } from 'lucide-react';
+  SelectValue,
+} from "@/components/ui/select";
+import { Mail, Lock } from "lucide-react";
 
 interface LoginFormProps {
   loginData: {
     email: string;
     password: string;
-    role: 'donor' | 'driver' | 'patient';
+    role: "donor" | "driver" | "patient";
     rememberMe: boolean;
   };
   setLoginData: React.Dispatch<
     React.SetStateAction<{
       email: string;
       password: string;
-      role: 'donor' | 'driver' | 'patient';
+      role: "donor" | "driver" | "patient";
       rememberMe: boolean;
     }>
   >;
@@ -39,7 +39,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   setLoginData,
   onSubmit,
   onForgotPassword,
-  isLoading
+  isLoading,
 }) => {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
@@ -96,7 +96,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <Select
           value={loginData.role}
           onValueChange={(value) =>
-            setLoginData({ ...loginData, role: value })
+            setLoginData({
+              ...loginData,
+              role: value as "donor" | "driver" | "patient",
+            })
           }
         >
           <SelectTrigger>
@@ -111,14 +114,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </div>
 
       {/* Remember Me */}
-      <div className="flex items-center space-x-2 py-1">
+      <div className="flex gap-2 items-center">
         <Checkbox
           id="remember-me"
           checked={loginData.rememberMe}
           onCheckedChange={(checked) =>
             setLoginData({ ...loginData, rememberMe: checked as boolean })
           }
-          className="h-4 w-4"
+          // className="h-4 w-4"
         />
         <Label
           htmlFor="remember-me"
@@ -134,7 +137,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         className="w-full bg-red-600 hover:bg-red-700 h-12 text-base"
         disabled={isLoading}
       >
-        {isLoading ? 'Signing in...' : 'Sign In'}
+        {isLoading ? "Signing in..." : "Sign In"}
       </Button>
     </form>
   );

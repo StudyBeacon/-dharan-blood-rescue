@@ -15,9 +15,9 @@ const LoginPage: React.FC = () => {
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(credentials)
+        body: JSON.stringify(credentials),
       });
 
       const data = await res.json();
@@ -26,7 +26,7 @@ const LoginPage: React.FC = () => {
         toast({
           title: "Login failed",
           description: data.message || "Invalid credentials",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
@@ -51,14 +51,33 @@ const LoginPage: React.FC = () => {
       toast({
         title: "Login error",
         description: "Something went wrong",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <LoginForm onSubmit={handleLogin} />
+      {/* <LoginForm onSubmit={handleLogin} /> */}
+      <LoginForm
+        loginData={{
+          email: "",
+          password: "",
+          role: "donor", // default role
+          rememberMe: false,
+        }}
+        setLoginData={(data) => console.log("Set login data", data)}
+        onSubmit={(e) => {
+          e.preventDefault();
+          // handleLogin({
+          //   email: e.target.email.value,
+          //   password: e.target.password.value,
+          //   role: e.target.role.value,
+          // });
+        }}
+        onForgotPassword={() => console.log("Forgot password clicked")}
+        isLoading={false} // replace with actual loading state if needed
+      />
     </div>
   );
 };
