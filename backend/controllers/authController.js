@@ -1,7 +1,4 @@
-// backend/controllers/authController.js
-
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Driver = require('../models/Driver');
 const Donor = require('../models/Donor');
@@ -21,13 +18,12 @@ const register = async (req, res) => {
       return res.status(409).json({ message: 'User already exists' });
     }
 
-    // Hash password manually
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Let User model hash password via pre('save')
     const user = await User.create({
       name,
       email,
       phone,
-      password: hashedPassword,
+      password,
       role
     });
 
@@ -112,7 +108,7 @@ const login = async (req, res) => {
     console.log('🧪 Incoming password:', password);
     console.log('🔐 Hashed password:', user.password);
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password);
     console.log('🔎 Comparison result:', isMatch);
 
     if (!isMatch) {

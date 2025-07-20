@@ -6,19 +6,15 @@ const patientController = require('../../controllers/patientController');
 // Protect all patient routes
 router.use(verifyToken);
 
-// @route   POST api/patient/requests
-// @desc    Create blood request
-// @access  Private
+// Blood Requests
 router.post('/requests', patientController.createBloodRequest);
-
-// @route   GET api/patient/requests
-// @desc    Get patient's blood requests
-// @access  Private
 router.get('/requests', patientController.getMyRequests);
-
-// @route   PUT api/patient/requests/:id/cancel
-// @desc    Cancel blood request
-// @access  Private
 router.put('/requests/:id/cancel', patientController.cancelRequest);
+
+// Ambulance Request
+router.post('/ambulance-request', patientController.createAmbulanceRequest);
+
+// Dashboard Data
+router.get('/dashboard', patientController.getDashboard);
 
 module.exports = router;

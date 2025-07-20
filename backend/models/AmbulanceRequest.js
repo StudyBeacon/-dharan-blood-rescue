@@ -14,26 +14,28 @@ const ambulanceRequestSchema = new mongoose.Schema({
   pickupLocation: {
     type: {
       type: String,
+      enum: ['Point'],
       default: 'Point',
-      enum: ['Point']
-    },
-    coordinates: {
-      type: [Number],
       required: true
     },
-    address: String
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      required: true
+    },
+    address: { type: String }
   },
   destination: {
     type: {
       type: String,
+      enum: ['Point'],
       default: 'Point',
-      enum: ['Point']
+      required: true
     },
     coordinates: {
       type: [Number],
       required: true
     },
-    address: String
+    address: { type: String }
   },
   status: {
     type: String,
@@ -47,21 +49,27 @@ const ambulanceRequestSchema = new mongoose.Schema({
   assignedAt: Date,
   completedAt: Date,
   locationUpdates: [{
-    coordinates: [Number],
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      required: true
+    },
     timestamp: {
       type: Date,
       default: Date.now
     }
   }],
-  estimatedTime: Number, // in minutes
-  actualTime: Number,    // in minutes
-  notes: String
+  estimatedTime: Number, // ETA in minutes
+  actualTime: Number,    // Total trip time in minutes
+  notes: { type: String }
 }, {
   timestamps: true
 });
 
+// Geospatial indexes for live tracking and matching
 ambulanceRequestSchema.index({ pickupLocation: '2dsphere' });
 ambulanceRequestSchema.index({ destination: '2dsphere' });
+
+// Optional: Track current status for quick queries
 ambulanceRequestSchema.index({ status: 1 });
 
 module.exports = mongoose.model('AmbulanceRequest', ambulanceRequestSchema);

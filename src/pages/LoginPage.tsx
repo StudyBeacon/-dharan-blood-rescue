@@ -1,5 +1,3 @@
-// src/pages/LoginPage.tsx
-
 import React from "react";
 import LoginForm from "../components/LoginForm";
 import { useNavigate } from "react-router-dom";
@@ -17,22 +15,25 @@ const LoginPage: React.FC = () => {
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(credentials),
+        body: JSON.stringify(credentials)
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        toast({ title: "Login failed", description: data.message, variant: "destructive" });
+        toast({
+          title: "Login failed",
+          description: data.message || "Invalid credentials",
+          variant: "destructive"
+        });
         return;
       }
 
       localStorage.setItem("token", data.token); // optional
       toast({ title: "Login successful!" });
 
-      // Redirect based on role
       switch (data.user.role) {
         case "donor":
           navigate("/donor-dashboard");
@@ -47,7 +48,11 @@ const LoginPage: React.FC = () => {
           navigate("/");
       }
     } catch (err) {
-      toast({ title: "Login error", description: "Something went wrong", variant: "destructive" });
+      toast({
+        title: "Login error",
+        description: "Something went wrong",
+        variant: "destructive"
+      });
     }
   };
 

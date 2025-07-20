@@ -1,5 +1,3 @@
-// backend/models/User.js
-
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
@@ -32,9 +30,7 @@ const userSchema = new mongoose.Schema({
     type: String, 
     required: true, 
     validate: {
-      validator: v => 
-        // Accepts either 10-digit Nepalese numbers (e.g. 9800000000)
-        // or international format with +977 prefix (e.g. +9779812345678)
+      validator: v =>
         /^(\+977)?\d{10}$/.test(v),
       message: props => `${props.value} is not a valid Nepalese phone number!`
     }
@@ -59,8 +55,11 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
-// Password comparison method
+// Password comparison method (updated)
 userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) {
+    throw new Error('Password field not selected. Use .select("+password") when querying.');
+  }
   return await bcrypt.compare(candidatePassword, this.password);
 };
 

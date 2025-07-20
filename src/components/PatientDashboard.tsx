@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -7,6 +6,7 @@ import EmergencyActions from '@/components/EmergencyActions';
 import ActiveRequestsList from '@/components/ActiveRequestsList';
 import BloodRequestForm from '@/components/BloodRequestForm';
 import AmbulanceRequestForm from '@/components/AmbulanceRequestForm';
+import axios from '@/api/api'; // assuming this points to Axios instance
 
 interface PatientDashboardProps {
   user: {
@@ -59,33 +59,8 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
-  
-  const [activeRequests, setActiveRequests] = useState<ActiveRequest[]>([
-    {
-      id: 1,
-      type: 'blood',
-      bloodGroup: 'O+',
-      status: 'Active',
-      requestedAt: '30 minutes ago',
-      location: 'Dharan Hospital',
-      responses: 3,
-      urgency: 'Critical',
-      progress: 60
-    },
-    {
-      id: 2,
-      type: 'ambulance',
-      status: 'En Route',
-      requestedAt: '15 minutes ago',
-      pickupLocation: 'Dharan-5, Main Road',
-      destination: 'BP Koirala Health Science',
-      driverName: 'Ramesh Gurung',
-      driverPhone: '+977-9841234567',
-      estimatedTime: '8 minutes',
-      progress: 75
-    }
-  ]);
 
+  const [activeRequests, setActiveRequests] = useState<ActiveRequest[]>([]);
   const [bloodRequest, setBloodRequest] = useState({
     bloodGroup: '',
     urgency: '',
@@ -106,26 +81,41 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
     specialRequirements: ''
   });
 
-  // Real-time updates simulation
+  // Transform frontend ambulance form into backend schema
+  const formatAmbulancePayload = (form: typeof ambulanceRequest) => ({
+    pickupLocation: {
+      type: 'Point',
+      coordinates: [87.2731, 26.8121], // Stubbed — replace with map/geolocation
+      address: form.pickupLocation
+    },
+    destination: {
+      type: 'Point',
+      coordinates: [87.2702, 26.8105],
+      address: form.destination
+    },
+    reason: `${form.urgency.toUpperCase()} - ${form.patientCondition}`,
+    notes: `Contact: ${form.contactPerson} (${form.contactNumber}). Special: ${form.specialRequirements || 'None'}`
+  });
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveRequests(prev => prev.map(request => ({
-        ...request,
-        progress: Math.min(request.progress + Math.random() * 5, 100)
-      })));
+      setActiveRequests(prev =>
+        prev.map(request => ({
+          ...request,
+          progress: Math.min(request.progress + Math.random() * 5, 100)
+        }))
+      );
     }, 5000);
-
     return () => clearInterval(interval);
   }, []);
 
   const handleBloodRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Replace with real API
+
       const newRequest: BloodRequest = {
         id: Date.now(),
         type: 'blood',
@@ -141,11 +131,9 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
         responses: 0,
         progress: 0
       };
-      
+
       setActiveRequests(prev => [newRequest, ...prev]);
       setShowBloodForm(false);
-      
-      // Reset form
       setBloodRequest({
         bloodGroup: '',
         urgency: '',
@@ -158,13 +146,13 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
 
       toast({
         title: t('bloodRequestSubmitted'),
-        description: "Your blood request has been sent to nearby donors.",
+        description: "Your blood request has been sent to nearby donors."
       });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to submit blood request. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -174,16 +162,16 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
   const handleAmbulanceRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const payload = formatAmbulancePayload(ambulanceRequest);
+      await axios.post('/patient/ambulance-request', payload);
+
       const newRequest: AmbulanceRequest = {
         id: Date.now(),
         type: 'ambulance',
-        pickupLocation: ambulanceRequest.pickupLocation,
-        destination: ambulanceRequest.destination,
+        pickupLocation: payload.pickupLocation.address,
+        destination: payload.destination.address,
         urgency: ambulanceRequest.urgency,
         contactPerson: ambulanceRequest.contactPerson,
         contactNumber: ambulanceRequest.contactNumber,
@@ -196,11 +184,9 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
         estimatedTime: 'Calculating...',
         progress: 0
       };
-      
+
       setActiveRequests(prev => [newRequest, ...prev]);
       setShowAmbulanceForm(false);
-      
-      // Reset form
       setAmbulanceRequest({
         pickupLocation: '',
         destination: '',
@@ -213,13 +199,13 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
 
       toast({
         title: t('ambulanceRequested'),
-        description: t('helpOnWay'),
+        description: t('helpOnWay')
       });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to request ambulance. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -236,10 +222,9 @@ const PatientDashboard = ({ user }: PatientDashboardProps) => {
 
       <ActiveRequestsList requests={activeRequests} />
 
-      {/* Real-time Ambulance Tracker */}
       {activeRequests.some(r => r.type === 'ambulance') && (
-        <AmbulanceTracker 
-          activeAmbulanceRequests={activeRequests.filter(r => r.type === 'ambulance') as AmbulanceRequest[]} 
+        <AmbulanceTracker
+          activeAmbulanceRequests={activeRequests.filter(r => r.type === 'ambulance') as AmbulanceRequest[]}
         />
       )}
 
