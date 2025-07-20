@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +19,7 @@ const DonorDashboard = ({ user }: DonorDashboardProps) => {
     totalDonations: 12,
     rewardPoints: 450,
     nextReward: 550,
-    lastDonation: '2 weeks ago'
+    lastDonation: '2 weeks ago',
   });
 
   const [activeRequests] = useState([
@@ -32,12 +31,12 @@ const DonorDashboard = ({ user }: DonorDashboardProps) => {
       distance: '2.5 km',
       contactPerson: 'Dr. Ram Sharma',
       contactNumber: '+977-9841234567',
-      requestedAt: '30 minutes ago'
-    }
+      requestedAt: '30 minutes ago',
+    },
   ]);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="min-h-screen p-4 bg-background text-foreground space-y-6 animate-fade-in">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
@@ -45,7 +44,7 @@ const DonorDashboard = ({ user }: DonorDashboardProps) => {
             <div className="flex items-center space-x-3">
               <Heart className="h-8 w-8 text-red-600 fill-current" />
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Total Donations</p>
+                <p className="text-sm text-muted-foreground">Total Donations</p>
                 <p className="text-2xl font-bold text-red-600">{stats.totalDonations}</p>
               </div>
             </div>
@@ -57,7 +56,7 @@ const DonorDashboard = ({ user }: DonorDashboardProps) => {
             <div className="flex items-center space-x-3">
               <Award className="h-8 w-8 text-yellow-600" />
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Reward Points</p>
+                <p className="text-sm text-muted-foreground">Reward Points</p>
                 <p className="text-2xl font-bold text-yellow-600">{stats.rewardPoints}</p>
               </div>
             </div>
@@ -69,7 +68,7 @@ const DonorDashboard = ({ user }: DonorDashboardProps) => {
             <div className="flex items-center space-x-3">
               <Clock className="h-8 w-8 text-blue-600" />
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Last Donation</p>
+                <p className="text-sm text-muted-foreground">Last Donation</p>
                 <p className="text-lg font-semibold text-blue-600">{stats.lastDonation}</p>
               </div>
             </div>
@@ -77,11 +76,9 @@ const DonorDashboard = ({ user }: DonorDashboardProps) => {
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-300">Blood Group</p>
-              <p className="text-2xl font-bold text-red-600">{user.bloodGroup || 'Not Set'}</p>
-            </div>
+          <CardContent className="p-6 text-center">
+            <p className="text-sm text-muted-foreground">Blood Group</p>
+            <p className="text-2xl font-bold text-red-600">{user.bloodGroup || 'Not Set'}</p>
           </CardContent>
         </Card>
       </div>
@@ -108,7 +105,7 @@ const DonorDashboard = ({ user }: DonorDashboardProps) => {
                         <Badge variant="destructive">{request.bloodGroup}</Badge>
                         <Badge variant="outline">{request.urgency}</Badge>
                       </div>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                         <span className="flex items-center space-x-1">
                           <MapPin className="h-4 w-4" />
                           <span>{request.location}</span>
@@ -135,7 +132,7 @@ const DonorDashboard = ({ user }: DonorDashboardProps) => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <div className="text-center py-8 text-muted-foreground">
               <Heart className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p>No active blood requests</p>
               <p className="text-sm">We'll notify you when someone needs your blood type</p>

@@ -1,174 +1,140 @@
+// backend/controllers/authController.js
+
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const Driver = require('../models/Driver');
 const Donor = require('../models/Donor');
 const Patient = require('../models/Patient');
-const Driver = require('../models/Driver');
-const { generateToken } = require('../utils/auth');
-const { ROLES } = require('../config/constants');
-const { registerSchema, loginSchema } = require('../utils/validation');
 
-exports.register = async (req, res) => {
+const register = async (req, res) => {
   try {
-    // 1. Validate Request Body
-    const { error, value } = registerSchema.validate(req.body, { abortEarly: false });
-    if (error) {
-      const errors = error.details.map(err => ({
-        field: err.path.join('.'),
-        message: err.message.replace(/['"]+/g, '')
-      }));
-      return res.status(400).json({ errors });
+    console.log('🔍 Incoming registration:', req.body);
+
+    const { name, email, phone, password, role } = req.body;
+    if (!name || !email || !phone || !password || !role) {
+      return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const { email, password, phone, role, ...profileData } = value;
-
-    // 2. Check for Existing User
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ 
-        errors: [{ field: 'email', message: 'Email already in use' }] 
-      });
+      return res.status(409).json({ message: 'User already exists' });
     }
 
-    // 3. Create User and Profile
-    const user = await User.create({ email, password, phone, role });
-    
-    let profile;
-    switch(role) {
-      case ROLES.DONOR:
-        profile = await Donor.create({ 
-          user: user._id,
-          name: profileData.name,
-          bloodGroup: profileData.bloodGroup,
-          location: profileData.location,
-          // Add other donor-specific fields
-        });
-        break;
-        
-      case ROLES.PATIENT:
-        profile = await Patient.create({ 
-          user: user._id,
-          name: profileData.name,
-          bloodGroup: profileData.bloodGroup,
-          // Add other patient-specific fields
-        });
-        break;
-        
-      case ROLES.DRIVER:
-        profile = await Driver.create({ 
-          user: user._id,
-          name: profileData.name,
-          licenseNumber: profileData.licenseNumber,
-          vehicle: profileData.vehicle
-        });
-        break;
-        
-      default:
-        await User.findByIdAndDelete(user._id);
-        return res.status(400).json({ 
-          errors: [{ field: 'role', message: 'Invalid role specified' }] 
-        });
-    }
+    // Hash password manually
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      password: hashedPassword,
+      role
+    });
 
-    // 4. Generate Token (excluding sensitive data)
-    const token = generateToken(user._id, user.role);
-    
-    // 5. Prepare Response
-    const userResponse = {
-      _id: user._id,
-      email: user.email,
-      role: user.role,
-      phone: user.phone,
-      profile
-    };
-
-    res.status(201).json({ 
-      status: 'success',
-      token,
-      data: {
-        user: userResponse
+    // Role-specific profile creation
+    switch (role) {
+      case 'driver': {
+        const { licenseNumber, vehicle, currentLocation } = req.body;
+        const driverData = {
+          user: user._id,
+          name,
+          licenseNumber,
+          vehicle,
+          currentLocation
+        };
+        console.log('🚗 driverData:', driverData);
+        await Driver.create(driverData);
+        break;
       }
-    });
+      case 'donor': {
+        const { bloodGroup, age, location } = req.body;
+        const donorData = {
+          user: user._id,
+          name,
+          bloodGroup,
+          age: Number(age),
+          location
+        };
+        console.log('🩸 donorData:', donorData);
+        await Donor.create(donorData);
+        break;
+      }
+      case 'patient': {
+        const { bloodGroup, age } = req.body;
+        const patientData = {
+          user: user._id,
+          name,
+          bloodGroup,
+          age: Number(age)
+        };
+        console.log('🧍 patientData:', patientData);
+        await Patient.create(patientData);
+        break;
+      }
+    }
 
-  } catch (err) {
-    console.error('Registration Error:', err);
-    res.status(500).json({ 
-      status: 'error',
-      message: 'Registration failed',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    const accessToken = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    return res.status(201).json({
+      message: 'Registration successful',
+      accessToken,
+      user
     });
+  } catch (err) {
+    console.error('🛑 Registration error:', err);
+    const message = err.errors
+      ? Object.values(err.errors).map(e => e.message).join(', ')
+      : err.message;
+    return res.status(500).json({ message });
   }
 };
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   try {
-    // 1. Validate Request
-    const { error, value } = loginSchema.validate(req.body, { abortEarly: false });
-    if (error) {
-      const errors = error.details.map(err => ({
-        field: err.path.join('.'),
-        message: err.message.replace(/['"]+/g, '')
-      }));
-      return res.status(400).json({ errors });
+    const { email, password, role } = req.body;
+    if (!email || !password || !role) {
+      return res.status(400).json({ message: 'Email, password and role are required' });
     }
 
-    const { email, password } = value;
-
-    // 2. Find User with Password
-    const user = await User.findOne({ email }).select('+password +active');
-    if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ 
-        status: 'fail',
-        message: 'Invalid email or password'
-      });
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // 3. Check if Account is Active
-    if (!user.active) {
-      return res.status(403).json({
-        status: 'fail',
-        message: 'Account is deactivated. Please contact support.'
-      });
+    if (user.role !== role) {
+      return res.status(403).json({ message: `Account is registered as "${user.role}"` });
     }
 
-    // 4. Get Role-Specific Profile
-    let profile;
-    switch(user.role) {
-      case ROLES.DONOR:
-        profile = await Donor.findOne({ user: user._id });
-        break;
-      case ROLES.PATIENT:
-        profile = await Patient.findOne({ user: user._id });
-        break;
-      case ROLES.DRIVER:
-        profile = await Driver.findOne({ user: user._id });
-        break;
+    console.log('🧪 Incoming password:', password);
+    console.log('🔐 Hashed password:', user.password);
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log('🔎 Comparison result:', isMatch);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // 5. Generate Token
-    const token = generateToken(user._id, user.role);
+    const accessToken = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
 
-    // 6. Prepare Response (excluding sensitive data)
-    const userResponse = {
-      _id: user._id,
-      email: user.email,
-      role: user.role,
-      phone: user.phone,
-      profile
-    };
-
-    res.status(200).json({
-      status: 'success',
-      token,
-      data: {
-        user: userResponse
-      }
+    user.password = undefined;
+    return res.status(200).json({
+      message: 'Login successful',
+      accessToken,
+      user
     });
-
   } catch (err) {
-    console.error('Login Error:', err);
-    res.status(500).json({
-      status: 'error',
-      message: 'Login failed',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
+    console.error('🛑 Login error:', err);
+    return res.status(500).json({ message: 'Server error' });
   }
 };
+
+module.exports = { register, login };

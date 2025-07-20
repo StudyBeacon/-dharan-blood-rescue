@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useOfflineSupport } from '@/hooks/useOfflineSupport';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import api from '@/api/api'; // ✅ axios instance to call backend
 
 export const useAppState = () => {
   const [user, setUser] = useState<{
@@ -12,27 +12,27 @@ export const useAppState = () => {
     bloodGroup?: string;
     id: string;
   } | null>(null);
-  
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [darkMode, setDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Initialize offline support and WebSocket
+  // Offline support and WebSocket
   const { isOnline, offlineData, pendingOperations } = useOfflineSupport();
   const { isConnected: wsConnected, messages: wsMessages } = useWebSocket();
 
-  // Get current language from localStorage, matching useTranslation hook
+  // Language state
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ne'>(() => {
     const saved = localStorage.getItem('bloodconnect_language');
     return (saved as 'en' | 'ne') || 'en';
   });
 
-  // Initialize user session and dark mode
+  // On initial load, restore state from localStorage
   useEffect(() => {
     const savedUser = localStorage.getItem('bloodconnect_user');
     const savedDarkMode = localStorage.getItem('bloodconnect_darkmode');
-    
+
     if (savedUser) {
       try {
         setUser(JSON.parse(savedUser));
@@ -41,18 +41,17 @@ export const useAppState = () => {
         localStorage.removeItem('bloodconnect_user');
       }
     }
-    
+
     if (savedDarkMode) {
       setDarkMode(JSON.parse(savedDarkMode));
     } else {
-      // Auto-detect system preference
       setDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
     }
-    
+
     setIsLoading(false);
   }, []);
 
-  // Apply dark mode
+  // Sync dark mode changes
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
@@ -62,20 +61,48 @@ export const useAppState = () => {
     localStorage.setItem('bloodconnect_darkmode', JSON.stringify(darkMode));
   }, [darkMode]);
 
-  const handleLogin = (role: 'donor' | 'driver' | 'patient', userData: any) => {
-    const userWithId = { ...userData, role, id: Date.now().toString() };
-    setUser(userWithId);
-    localStorage.setItem('bloodconnect_user', JSON.stringify(userWithId));
-    toast({
-      title: "Welcome back!",
-      description: `Logged in as ${role}`,
-    });
+  // ✅ Real login API call to backend
+  const handleLogin = async (loginData: {
+    email: string;
+    password: string;
+    role: 'donor' | 'driver' | 'patient';
+  }) => {
+    try {
+      setIsLoading(true);
+      const response = await api.post('/auth/login', loginData);
+
+      const { token, user: userData } = response.data;
+
+      const userWithRole = {
+        ...userData,
+        role: loginData.role,
+      };
+
+      setUser(userWithRole);
+      localStorage.setItem('bloodconnect_user', JSON.stringify(userWithRole));
+      localStorage.setItem('bloodconnect_token', token);
+
+      toast({
+        title: "Welcome back!",
+        description: `Logged in as ${loginData.role}`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error?.response?.data?.message || "Invalid credentials or server error",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLogout = () => {
     setUser(null);
     setActiveTab('dashboard');
     localStorage.removeItem('bloodconnect_user');
+    localStorage.removeItem('bloodconnect_token');
+
     toast({
       title: "Logged out",
       description: "You have been logged out successfully",
@@ -105,6 +132,6 @@ export const useAppState = () => {
     handleLogin,
     handleLogout,
     handleLanguageChange,
-    handleDarkModeToggle
+    handleDarkModeToggle,
   };
 };

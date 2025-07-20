@@ -1,4 +1,3 @@
-
 import React from 'react';
 import AuthForm from '@/components/AuthForm';
 import Header from '@/components/Header';
@@ -10,7 +9,7 @@ import PageHeader from '@/components/PageHeader';
 import MainContent from '@/components/MainContent';
 import { useAppState } from '@/hooks/useAppState';
 
-const Index = () => {
+const Index: React.FC = () => {
   const {
     user,
     setUser,
@@ -25,7 +24,7 @@ const Index = () => {
     handleLogin,
     handleLogout,
     handleLanguageChange,
-    handleDarkModeToggle
+    handleDarkModeToggle,
   } = useAppState();
 
   if (isLoading) {
@@ -39,7 +38,7 @@ const Index = () => {
   if (!user) {
     return (
       <ErrorBoundary>
-        <AuthForm onLogin={handleLogin} currentLanguage={currentLanguage} />
+        <AuthForm />
       </ErrorBoundary>
     );
   }
@@ -47,30 +46,30 @@ const Index = () => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-        <StatusIndicators 
+        <StatusIndicators
           isOnline={isOnline}
           pendingOperations={pendingOperations}
           wsConnected={wsConnected}
         />
-        
-        <Header 
-          user={user} 
+
+        <Header
+          user={user}
           onLogout={handleLogout}
           onLanguageChange={handleLanguageChange}
           currentLanguage={currentLanguage}
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
-        
+
         <main className="container mx-auto px-4 py-6 pb-20 md:pb-6">
           <BreadcrumbNavigation activeTab={activeTab} userRole={user.role} />
-          
-          <PageHeader 
+
+          <PageHeader
             activeTab={activeTab}
             userName={user.name}
             userRole={user.role}
           />
-          
+
           <MainContent
             activeTab={activeTab}
             user={user}
@@ -81,7 +80,7 @@ const Index = () => {
           />
         </main>
 
-        <BottomNavigation 
+        <BottomNavigation
           activeTab={activeTab}
           onTabChange={setActiveTab}
           userRole={user.role}

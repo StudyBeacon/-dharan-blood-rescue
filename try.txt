@@ -1,0 +1,809 @@
+import React from "react";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import DonorsPage from "./pages/DonorsPage"; // Fixed import
+import LoginPage from "./pages/LoginPage";   // Import your login page
+
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<LoginPage />} />       {/* Login route */}
+          <Route path="/donor-dashboard" element={<DonorsPage />} /> {/* Donor dashboard route */}
+          <Route path="*" element={<NotFound />} />             {/* Catch-all */}
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
+
+export default App;// This is App.tsx
+
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import HealthcareLogo from '@/components/HealthcareLogo';
+import ForgotPasswordModal from '@/components/ForgotPasswordModal';
+import LoginForm from '@/components/LoginForm';
+import SignupForm from '@/components/SignupForm';
+import api from '@/api/api';
+
+interface AuthFormProps {
+  onLogin: (role: 'donor' | 'driver' | 'patient', userData: any) => void;
+  currentLanguage?: 'en' | 'ne';
+}
+
+const AuthForm = ({ onLogin, currentLanguage = 'en' }: AuthFormProps) => {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: '',
+    role: 'donor' as 'donor' | 'driver' | 'patient',
+    rememberMe: false
+  });
+
+  const [signupData, setSignupData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    role: 'donor' as 'donor' | 'driver' | 'patient',
+    bloodGroup: ''
+  });
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Store remember me preference
+      if (loginData.rememberMe) {
+        localStorage.setItem('bloodconnect_remember_email', loginData.email);
+      } else {
+        localStorage.removeItem('bloodconnect_remember_email');
+      }
+
+      // Real API call to backend
+      const response = await api.post('/auth/login', {
+        email: loginData.email,
+        password: loginData.password,
+        role: loginData.role,
+      });
+
+      const { accessToken, user } = response.data;
+
+      // Store token and notify parent
+      localStorage.setItem('token', accessToken);
+      onLogin(loginData.role, user);
+
+      // Redirect to role-specific dashboard
+      navigate(`/dashboard/${loginData.role}`);
+    } catch (error: any) {
+      console.error('Login error:', error.response?.data || error.message);
+      alert(error.response?.data?.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (signupData.password !== signupData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Simulate API call (you can implement real signup later)
+    setTimeout(() => {
+      onLogin(signupData.role, {
+        name: signupData.name,
+        email: signupData.email,
+        role: signupData.role,
+        bloodGroup: signupData.bloodGroup
+      });
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  // Load remembered email on component mount
+  React.useEffect(() => {
+    const rememberedEmail = localStorage.getItem('bloodconnect_remember_email');
+    if (rememberedEmail) {
+      setLoginData(prev => ({
+        ...prev,
+        email: rememberedEmail,
+        rememberMe: true
+      }));
+    }
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center mb-4">
+            <HealthcareLogo size={64} />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">BloodConnect</h1>
+          <p className="text-gray-600">Emergency Blood & Ambulance System</p>
+          <p className="text-sm text-gray-500">Dharan, Nepal</p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Welcome</CardTitle>
+            <CardDescription>
+              Join our life-saving community
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="login">
+                <LoginForm
+                  loginData={loginData}
+                  setLoginData={setLoginData}
+                  onSubmit={handleLogin}
+                  onForgotPassword={() => setShowForgotPassword(true)}
+                  isLoading={isLoading}
+                />
+              </TabsContent>
+              
+              <TabsContent value="signup">
+                <SignupForm
+                  signupData={signupData}
+                  setSignupData={setSignupData}
+                  onSubmit={handleSignup}
+                  isLoading={isLoading}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        <ForgotPasswordModal 
+          isOpen={showForgotPassword}
+          onClose={() => setShowForgotPassword(false)}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default AuthForm;//This is AuthForm.tsx
+
+
+
+
+import React, { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@/hooks/useTranslation';
+import AmbulanceTracker from '@/components/AmbulanceTracker';
+import EmergencyActions from '@/components/EmergencyActions';
+import ActiveRequestsList from '@/components/ActiveRequestsList';
+import BloodRequestForm from '@/components/BloodRequestForm';
+import AmbulanceRequestForm from '@/components/AmbulanceRequestForm';
+
+interface PatientDashboardProps {
+  user: {
+    name: string;
+    email: string;
+    role: string;
+    id: string;
+  };
+}
+
+interface BloodRequest {
+  id: number;
+  type: 'blood';
+  bloodGroup: string;
+  status: string;
+  requestedAt: string;
+  location: string;
+  responses: number;
+  urgency: string;
+  progress: number;
+  unitsNeeded?: string;
+  contactPerson?: string;
+  contactNumber?: string;
+  additionalInfo?: string;
+}
+
+interface AmbulanceRequest {
+  id: number;
+  type: 'ambulance';
+  status: string;
+  requestedAt: string;
+  pickupLocation: string;
+  destination: string;
+  driverName?: string;
+  driverPhone?: string;
+  estimatedTime?: string;
+  progress: number;
+  urgency?: string;
+  contactPerson?: string;
+  contactNumber?: string;
+  patientCondition?: string;
+  specialRequirements?: string;
+}
+
+type ActiveRequest = BloodRequest | AmbulanceRequest;
+
+const PatientDashboard = ({ user }: PatientDashboardProps) => {
+  const [showBloodForm, setShowBloodForm] = useState(false);
+  const [showAmbulanceForm, setShowAmbulanceForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const { t } = useTranslation();
+  
+  const [activeRequests, setActiveRequests] = useState<ActiveRequest[]>([
+    {
+      id: 1,
+      type: 'blood',
+      bloodGroup: 'O+',
+      status: 'Active',
+      requestedAt: '30 minutes ago',
+      location: 'Dharan Hospital',
+      responses: 3,
+      urgency: 'Critical',
+      progress: 60
+    },
+    {
+      id: 2,
+      type: 'ambulance',
+      status: 'En Route',
+      requestedAt: '15 minutes ago',
+      pickupLocation: 'Dharan-5, Main Road',
+      destination: 'BP Koirala Health Science',
+      driverName: 'Ramesh Gurung',
+      driverPhone: '+977-9841234567',
+      estimatedTime: '8 minutes',
+      progress: 75
+    }
+  ]);
+
+  const [bloodRequest, setBloodRequest] = useState({
+    bloodGroup: '',
+    urgency: '',
+    location: '',
+    contactPerson: '',
+    contactNumber: '',
+    additionalInfo: '',
+    unitsNeeded: '1'
+  });
+
+  const [ambulanceRequest, setAmbulanceRequest] = useState({
+    pickupLocation: '',
+    destination: '',
+    urgency: '',
+    contactPerson: '',
+    contactNumber: '',
+    patientCondition: '',
+    specialRequirements: ''
+  });
+
+  // Real-time updates simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveRequests(prev => prev.map(request => ({
+        ...request,
+        progress: Math.min(request.progress + Math.random() * 5, 100)
+      })));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleBloodRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const newRequest: BloodRequest = {
+        id: Date.now(),
+        type: 'blood',
+        bloodGroup: bloodRequest.bloodGroup,
+        urgency: bloodRequest.urgency,
+        location: bloodRequest.location,
+        contactPerson: bloodRequest.contactPerson,
+        contactNumber: bloodRequest.contactNumber,
+        additionalInfo: bloodRequest.additionalInfo,
+        unitsNeeded: bloodRequest.unitsNeeded,
+        status: 'Active',
+        requestedAt: 'Just now',
+        responses: 0,
+        progress: 0
+      };
+      
+      setActiveRequests(prev => [newRequest, ...prev]);
+      setShowBloodForm(false);
+      
+      // Reset form
+      setBloodRequest({
+        bloodGroup: '',
+        urgency: '',
+        location: '',
+        contactPerson: '',
+        contactNumber: '',
+        additionalInfo: '',
+        unitsNeeded: '1'
+      });
+
+      toast({
+        title: t('bloodRequestSubmitted'),
+        description: "Your blood request has been sent to nearby donors.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit blood request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAmbulanceRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const newRequest: AmbulanceRequest = {
+        id: Date.now(),
+        type: 'ambulance',
+        pickupLocation: ambulanceRequest.pickupLocation,
+        destination: ambulanceRequest.destination,
+        urgency: ambulanceRequest.urgency,
+        contactPerson: ambulanceRequest.contactPerson,
+        contactNumber: ambulanceRequest.contactNumber,
+        patientCondition: ambulanceRequest.patientCondition,
+        specialRequirements: ambulanceRequest.specialRequirements,
+        status: 'Dispatching',
+        requestedAt: 'Just now',
+        driverName: 'Assigning...',
+        driverPhone: '',
+        estimatedTime: 'Calculating...',
+        progress: 0
+      };
+      
+      setActiveRequests(prev => [newRequest, ...prev]);
+      setShowAmbulanceForm(false);
+      
+      // Reset form
+      setAmbulanceRequest({
+        pickupLocation: '',
+        destination: '',
+        urgency: '',
+        contactPerson: '',
+        contactNumber: '',
+        patientCondition: '',
+        specialRequirements: ''
+      });
+
+      toast({
+        title: t('ambulanceRequested'),
+        description: t('helpOnWay'),
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to request ambulance. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
+      <EmergencyActions
+        onBloodRequest={() => setShowBloodForm(true)}
+        onAmbulanceRequest={() => setShowAmbulanceForm(true)}
+        isLoading={isLoading}
+      />
+
+      <ActiveRequestsList requests={activeRequests} />
+
+      {/* Real-time Ambulance Tracker */}
+      {activeRequests.some(r => r.type === 'ambulance') && (
+        <AmbulanceTracker 
+          activeAmbulanceRequests={activeRequests.filter(r => r.type === 'ambulance') as AmbulanceRequest[]} 
+        />
+      )}
+
+      <BloodRequestForm
+        isVisible={showBloodForm}
+        isLoading={isLoading}
+        bloodRequest={bloodRequest}
+        onBloodRequestChange={setBloodRequest}
+        onSubmit={handleBloodRequest}
+        onClose={() => setShowBloodForm(false)}
+      />
+
+      <AmbulanceRequestForm
+        isVisible={showAmbulanceForm}
+        isLoading={isLoading}
+        ambulanceRequest={ambulanceRequest}
+        onAmbulanceRequestChange={setAmbulanceRequest}
+        onSubmit={handleAmbulanceRequest}
+        onClose={() => setShowAmbulanceForm(false)}
+      />
+    </div>
+  );
+};
+
+export default PatientDashboard;//This is PatientDashboard.tsx
+
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Heart, Clock, Award, MapPin, Phone } from 'lucide-react';
+
+interface DonorDashboardProps {
+  user: {
+    name: string;
+    email: string;
+    role: string;
+    id: string;
+    bloodGroup?: string;
+  };
+}
+
+const DonorDashboard = ({ user }: DonorDashboardProps) => {
+  const [stats] = useState({
+    totalDonations: 12,
+    rewardPoints: 450,
+    nextReward: 550,
+    lastDonation: '2 weeks ago'
+  });
+
+  const [activeRequests] = useState([
+    {
+      id: 1,
+      bloodGroup: 'O+',
+      location: 'Dharan Hospital',
+      urgency: 'Critical',
+      distance: '2.5 km',
+      contactPerson: 'Dr. Ram Sharma',
+      contactNumber: '+977-9841234567',
+      requestedAt: '30 minutes ago'
+    }
+  ]);
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <Heart className="h-8 w-8 text-red-600 fill-current" />
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Total Donations</p>
+                <p className="text-2xl font-bold text-red-600">{stats.totalDonations}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <Award className="h-8 w-8 text-yellow-600" />
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Reward Points</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats.rewardPoints}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <Clock className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Last Donation</p>
+                <p className="text-lg font-semibold text-blue-600">{stats.lastDonation}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-300">Blood Group</p>
+              <p className="text-2xl font-bold text-red-600">{user.bloodGroup || 'Not Set'}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Active Blood Requests */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Heart className="h-5 w-5 text-red-600" />
+            <span>Nearby Blood Requests</span>
+          </CardTitle>
+          <CardDescription>
+            Emergency requests matching your blood group
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {activeRequests.length > 0 ? (
+            <div className="space-y-4">
+              {activeRequests.map((request) => (
+                <div key={request.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="destructive">{request.bloodGroup}</Badge>
+                        <Badge variant="outline">{request.urgency}</Badge>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
+                        <span className="flex items-center space-x-1">
+                          <MapPin className="h-4 w-4" />
+                          <span>{request.location}</span>
+                        </span>
+                        <span>{request.distance}</span>
+                        <span>{request.requestedAt}</span>
+                      </div>
+                      <div className="text-sm">
+                        <p><strong>Contact:</strong> {request.contactPerson}</p>
+                        <p><strong>Phone:</strong> {request.contactNumber}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button className="bg-red-600 hover:bg-red-700">
+                      Accept Request
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Phone className="h-4 w-4 mr-1" />
+                      Call
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <Heart className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p>No active blood requests</p>
+              <p className="text-sm">We'll notify you when someone needs your blood type</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default DonorDashboard;//This is DonorDashboard.jsx
+
+
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Truck, MapPin, Clock, Phone, Navigation } from 'lucide-react';
+
+interface DriverDashboardProps {
+  user: {
+    name: string;
+    email: string;
+    role: string;
+    id: string;
+  };
+}
+
+const DriverDashboard = ({ user }: DriverDashboardProps) => {
+  const [activeTrips] = useState([
+    {
+      id: 1,
+      patientName: 'John Doe',
+      pickupLocation: 'Dharan-5, Main Road',
+      destination: 'BP Koirala Health Science',
+      urgency: 'Emergency',
+      contactNumber: '+977-9841234567',
+      estimatedTime: '12 minutes',
+      status: 'En Route'
+    }
+  ]);
+
+  const [stats] = useState({
+    totalTrips: 45,
+    completedToday: 3,
+    avgRating: 4.8,
+    earnings: 'Rs. 12,500'
+  });
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <Truck className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Total Trips</p>
+                <p className="text-2xl font-bold text-blue-600">{stats.totalTrips}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-3">
+              <Clock className="h-8 w-8 text-green-600" />
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Completed Today</p>
+                <p className="text-2xl font-bold text-green-600">{stats.completedToday}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-300">Average Rating</p>
+              <p className="text-2xl font-bold text-yellow-600">{stats.avgRating}⭐</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-300">Monthly Earnings</p>
+              <p className="text-xl font-bold text-green-600">{stats.earnings}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Active Trips */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Truck className="h-5 w-5 text-blue-600" />
+            <span>Active Trips</span>
+          </CardTitle>
+          <CardDescription>
+            Current ambulance assignments
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {activeTrips.length > 0 ? (
+            <div className="space-y-4">
+              {activeTrips.map((trip) => (
+                <div key={trip.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="space-y-2 flex-1">
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="destructive">{trip.urgency}</Badge>
+                        <Badge variant="outline">{trip.status}</Badge>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-medium">Patient: {trip.patientName}</p>
+                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
+                          <span className="flex items-center space-x-1">
+                            <MapPin className="h-4 w-4" />
+                            <span>From: {trip.pickupLocation}</span>
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
+                          <span className="flex items-center space-x-1">
+                            <MapPin className="h-4 w-4" />
+                            <span>To: {trip.destination}</span>
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
+                          <span className="flex items-center space-x-1">
+                            <Clock className="h-4 w-4" />
+                            <span>ETA: {trip.estimatedTime}</span>
+                          </span>
+                          <span>Contact: {trip.contactNumber}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Navigation className="h-4 w-4 mr-1" />
+                      Navigate
+                    </Button>
+                    <Button variant="outline">
+                      <Phone className="h-4 w-4 mr-1" />
+                      Call Patient
+                    </Button>
+                    <Button variant="outline">
+                      Update Status
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <Truck className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p>No active trips</p>
+              <p className="text-sm">You'll be notified when a trip is assigned</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default DriverDashboard;//This is DriverDashboard.jsx
+
+
+
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  allowedRoles?: ('donor' | 'driver' | 'patient')[];
+  user: any;
+}
+
+const ProtectedRoute = ({ children, allowedRoles, user }: ProtectedRouteProps) => {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+export default ProtectedRoute;//This is ProtectedRoute.jsx
+
+
+
+
